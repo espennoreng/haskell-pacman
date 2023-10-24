@@ -30,3 +30,4 @@ invalidGameBoard =
           ++ [(x, -0.5) | x <- [-0.5, -0.4 .. 0.5]],
       foods = [(-0.5, -0.5), (0.5, 0.5)] -- Foods placed in the corners (inside walls)
     }
+
