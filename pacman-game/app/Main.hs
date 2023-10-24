@@ -1,13 +1,10 @@
-import Graphics.Gloss
-
-window :: Display
-window = InWindow "My Gloss Game" (400, 300) (10, 10)
-
-background :: Color
-background = white
-
-drawing :: Picture
-drawing = Color red (Circle 50)
+import Graphics.Gloss (display)
+import Model ()
+import Boards (validGameBoard)
+import Test (runTests)
+import View (background, gameBoardToPicture, window)
 
 main :: IO ()
-main = display window background drawing
+main = do 
+    runTests
+    display window background (gameBoardToPicture validGameBoard)
