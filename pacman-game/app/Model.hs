@@ -28,21 +28,17 @@ pacmanRadius :: Float
 pacmanRadius = 0.05
 
 intersects :: Position -> Position -> Bool
-intersects (x1, y1) (x2, y2) = 
+intersects (x1, y1) (x2, y2) =
     let dx = x1 - x2
         dy = y1 - y2
         distance = sqrt (dx * dx + dy * dy)
     in distance < pacmanRadius
 
 
-isPositionFreeOfWalls :: GameBoard -> Position -> Direction -> Bool
-isPositionFreeOfWalls (GameBoard walls _) currentPos direction =
-  let proposedPosition = case direction of
-        Up -> (fst currentPos, snd currentPos + 0.1)
-        Down -> (fst currentPos, snd currentPos - 0.1)
-        Model.Left -> (fst currentPos - 0.1, snd currentPos)
-        Model.Right -> (fst currentPos + 0.1, snd currentPos)
-  in not $ any (intersects proposedPosition) walls
+isPositionFreeOfWalls :: GameBoard -> Pacman -> Direction -> Bool
+isPositionFreeOfWalls (GameBoard walls _) position direction =
+  let proposedPosition = calculateNewPosition position direction
+   in not (any (intersects proposedPosition) walls)
 
 
 isPositionInBounds :: (Ord a1, Ord a2, Fractional a1, Fractional a2) => (a1, a2) -> Bool
@@ -71,7 +67,7 @@ movePacman board pacman =
 validMove :: GameBoard -> Pacman -> Direction -> Bool
 validMove board pacman proposedDirection =
   let newPos = calculateNewPosition pacman proposedDirection
-   in isPositionFreeOfWalls board newPos proposedDirection
+   in isPositionFreeOfWalls board pacman proposedDirection
 
 calculateNewPosition :: Pacman -> Direction -> Position
 calculateNewPosition pacman proposedDirection =
@@ -81,4 +77,3 @@ calculateNewPosition pacman proposedDirection =
             Down -> (x, y - 0.1)
             Model.Left -> (x - 0.1, y)
             Model.Right -> (x + 0.1, y)
-            
