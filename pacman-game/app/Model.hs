@@ -52,7 +52,7 @@ initGameState = GameState {pacman = initPacman, food = makeFoodOnEveryAvailableP
 
 initPacman :: Pacman -- Initialize the pacman in the center facing right.
 initPacman = Pacman {position = (0.0, 0.0), direction = Model.Right}
-
+-- TODO: Make sure that food is not placed inside the ghost house.
 makeFoodOnEveryAvailablePosition :: GameBoard -> [Food]
 makeFoodOnEveryAvailablePosition board =
   let allPositions = [(x, y) | x <- [-0.45, -0.40 .. 0.45], y <- [-0.45, -0.40 .. 0.45]]
