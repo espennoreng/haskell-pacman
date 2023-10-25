@@ -1,8 +1,6 @@
 module Test where
 
-import Boards
-    ( validGameBoard, invalidGameBoard, pacmanGameBoard )
-import Model (Food, GameBoard (..), Wall, isPositionFree, isPositionInBounds, isPositionFreeOfWalls, movePacman, initPacman, Pacman (..), Direction (..))
+import Model (Food, GameBoard (..), Wall,validGameBoard, invalidGameBoard, pacmanGameBoard, isPositionFree, isPositionInBounds, isPositionFreeOfWalls, movePacman, initPacman, Pacman (..), Direction (..))
 import Test.HUnit
 
 -- Test if any food is placed inside a wall

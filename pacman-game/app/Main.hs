@@ -1,6 +1,5 @@
 import Graphics.Gloss (play)
-import Model (initPacman)
-import Boards (validGameBoard)
+import Model (initGameState)
 import Test (runTests)
 import View (background, gameBoardToPicture, window)
 import Controller (handleInput, render, update)
@@ -8,5 +7,5 @@ import Controller (handleInput, render, update)
 main :: IO ()
 main = do 
     runTests
-    let initialState = initPacman
+    let initialState = initGameState
     play window background 5 initialState render handleInput update

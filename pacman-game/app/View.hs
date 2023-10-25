@@ -47,6 +47,6 @@ pacmanToPicture pacman =
 
 
 -- Convert the game board with walls, foods and pacman into a Picture
-gameBoardToPicture :: GameBoard -> Pacman -> Picture
-gameBoardToPicture (GameBoard walls foods) pacman =
-    pictures $ map wallToPicture walls ++ map foodToPicture foods ++ [pacmanToPicture pacman]
+gameBoardToPicture :: GameBoard -> GameState -> Picture
+gameBoardToPicture (GameBoard walls) (GameState pacman food) =
+    pictures $ map wallToPicture walls ++ [pacmanToPicture pacman] ++ map foodToPicture food
