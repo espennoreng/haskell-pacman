@@ -21,13 +21,13 @@ foodToPicture :: Food -> Picture
 foodToPicture = positionToCircle
   where
     positionToCircle (x, y) =
-        Translate (x * 200) (y * 200) $ Color blue $ circleSolid 10
+        Translate (x * 200) (y * 200) $ Color blue $ rectangleSolid 20 20
 
 -- Convert pacman into a Picture
 pacmanToPicture :: Pacman -> Picture
 pacmanToPicture pacman =
     let (x, y) = position pacman 
-    in Translate (x * 200) (y * 200) $ Color yellow $ circleSolid 10
+    in Translate (x * 200) (y * 200) $ Color yellow $ rectangleSolid 20 20
 
 
 -- Convert the game board with walls, foods and pacman into a Picture

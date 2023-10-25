@@ -60,7 +60,7 @@ testMovePacmanRight =
   TestCase $
     let
       pacman = initPacman
-      movedPacman = movePacman 0.1 validGameBoard (pacman {direction = Model.Right})
+      movedPacman = movePacman validGameBoard (pacman {direction = Model.Right})
     in
       assertEqual
         "Pacman moves right"
@@ -73,7 +73,7 @@ testMovePacmanLeft =
   TestCase $
     let
       pacman = initPacman
-      movedPacman = movePacman 1 validGameBoard (pacman {direction = Model.Left})
+      movedPacman = movePacman validGameBoard (pacman {direction = Model.Left})
     in
       assertEqual
         "Pacman moves left"
@@ -86,7 +86,7 @@ testMovePacmanUp =
   TestCase $
     let
       pacman = initPacman
-      movedPacman = movePacman 1 validGameBoard (pacman {direction = Model.Up})
+      movedPacman = movePacman validGameBoard (pacman {direction = Model.Up})
     in
       assertEqual
         "Pacman moves up"
@@ -99,7 +99,7 @@ testMovePacmanDown =
   TestCase $
     let
       pacman = initPacman
-      movedPacman = movePacman 1 validGameBoard (pacman {direction = Model.Down})
+      movedPacman = movePacman validGameBoard (pacman {direction = Model.Down})
     in
       assertEqual
         "Pacman moves down"
@@ -111,7 +111,7 @@ testPacmanCollisionWithWallLeft :: Test
 testPacmanCollisionWithWallLeft =
   TestCase $
     let pacman = Pacman {position = (-0.4, 0.0), direction = Model.Left}
-        movedPacman = movePacman 1 validGameBoard pacman
+        movedPacman = movePacman validGameBoard pacman
     in
       assertEqual
         "Pacman should not move left into wall"
@@ -122,7 +122,7 @@ testPacmanCollisionWithWallRight :: Test
 testPacmanCollisionWithWallRight =
   TestCase $
     let pacman = Pacman {position = (0.4, 0.0), direction = Model.Right}
-        movedPacman = movePacman 1 validGameBoard pacman
+        movedPacman = movePacman validGameBoard pacman
     in
       assertEqual
         "Pacman should not move right into wall"
@@ -134,7 +134,7 @@ testPacmanCollisionWithWallUp :: Test
 testPacmanCollisionWithWallUp =
   TestCase $
     let pacman = Pacman {position = (0.0, 0.4), direction = Model.Up}
-        movedPacman = movePacman 1 validGameBoard pacman
+        movedPacman = movePacman validGameBoard pacman
     in
       assertEqual
         "Pacman should not move up into wall"
@@ -145,7 +145,7 @@ testPacmanCollisionWithWallDown :: Test
 testPacmanCollisionWithWallDown =
   TestCase $
     let pacman = Pacman {position = (0.0, -0.4), direction = Model.Down}
-        movedPacman = movePacman 1 validGameBoard pacman
+        movedPacman = movePacman validGameBoard pacman
     in
       assertEqual
         "Pacman should not move down into wall"

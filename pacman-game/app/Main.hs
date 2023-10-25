@@ -9,4 +9,4 @@ main :: IO ()
 main = do 
     runTests
     let initialState = initPacman
-    play window background 60 initialState render handleInput update
+    play window background 10 initialState render handleInput update

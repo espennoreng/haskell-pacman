@@ -61,25 +61,24 @@ data Pacman = Pacman
 initPacman :: Pacman -- Initialize the pacman in the center facing right.
 initPacman = Pacman {position = (0.0, 0.0), direction = Model.Right}
 
-movePacman :: Float -> GameBoard -> Pacman -> Pacman
-movePacman dt board pacman =
-  let proposedPosition = calculateNewPosition (dt * 0.1) pacman (direction pacman)
-   in if validMove (dt * 0.1) board pacman (direction pacman)
+movePacman ::  GameBoard -> Pacman -> Pacman
+movePacman board pacman =
+  let proposedPosition = calculateNewPosition pacman (direction pacman)
+   in if validMove board pacman (direction pacman)
         then pacman {position = proposedPosition}
         else pacman
 
-validMove :: Float -> GameBoard -> Pacman -> Direction -> Bool
-validMove dt board pacman proposedDirection =
-  let newPos = calculateNewPosition dt pacman proposedDirection
+validMove :: GameBoard -> Pacman -> Direction -> Bool
+validMove board pacman proposedDirection =
+  let newPos = calculateNewPosition pacman proposedDirection
    in isPositionFreeOfWalls board newPos proposedDirection
 
-calculateNewPosition :: Float -> Pacman -> Direction -> Position
-calculateNewPosition dt pacman proposedDirection =
-  -- WE NEED TO EXPLAIN THIS BETTER (dt)
-  let (x, y) = position pacman
-      movement = dt
-   in case proposedDirection of
-        Up -> (x, y + movement)
-        Down -> (x, y - movement)
-        Model.Left -> (x - movement, y)
-        Model.Right -> (x + movement, y)
+calculateNewPosition :: Pacman -> Direction -> Position
+calculateNewPosition pacman proposedDirection =
+    let (x, y) = position pacman
+     in case proposedDirection of
+            Up -> (x, y + 0.1)
+            Down -> (x, y - 0.1)
+            Model.Left -> (x - 0.1, y)
+            Model.Right -> (x + 0.1, y)
+            

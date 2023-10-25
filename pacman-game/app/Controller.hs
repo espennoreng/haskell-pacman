@@ -15,10 +15,6 @@ handleInput _ pacman = pacman -- don't change anything for other events
 render :: Pacman -> Picture
 render = gameBoardToPicture validGameBoard
 
--- Delta time represents the elapsed time between two consecutive frames in real-time 
--- applications, ensuring consistent behavior across varying frame rates. 
--- By scaling movements or updates with this value, objects in games or simulations 
--- move consistently regardless of how quickly frames are processed.
 
-update :: Float -> Pacman -> Pacman -- dt = delta time (WE NEED TO EXPLAIN THIS BETTER)
-update dt = movePacman dt validGameBoard -- WE NEED TO EXPLAIN THIS BETTER (dt)
+update :: Float -> Pacman -> Pacman
+update _ = movePacman validGameBoard
