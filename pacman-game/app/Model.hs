@@ -25,7 +25,7 @@ isPositionFree (GameBoard walls foods) position =
    We dont need to the pacmanRadius (0.1) here, we can just use 0.1 in the functions
 -}
 pacmanRadius :: Float
-pacmanRadius = 0.05
+pacmanRadius = 0.025
 
 intersects :: Position -> Position -> Bool
 intersects (x1, y1) (x2, y2) =
@@ -72,7 +72,7 @@ validMove board position proposedDirection =
 calculateNewPosition :: Position -> Direction -> Position
 calculateNewPosition (x, y) proposedDirection =
     case proposedDirection of
-            Up -> (x, y + 0.1)
-            Down -> (x, y - 0.1)
-            Model.Left -> (x - 0.1, y)
-            Model.Right -> (x + 0.1, y)
+            Up -> (x, y + 0.05)
+            Down -> (x, y - 0.05)
+            Model.Left -> (x - 0.05, y)
+            Model.Right -> (x + 0.05, y)
