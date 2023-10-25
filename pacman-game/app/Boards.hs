@@ -15,7 +15,16 @@ pacmanGameBoard =
               rightMiddleU ++
               leftLineMiddle ++
               rightLineMiddle ++
-              ghostHouseWalls
+              ghostHouseWalls ++
+              middleLeftRectangle ++
+              middleRightRectangle ++
+              topLeftL ++
+              topRightL ++
+              middleRectangleTopLeft ++
+              middleRectangleTopRight ++
+              topT ++ 
+              topZLeft ++
+              topZRight
         ,
       foods = []
     }
@@ -58,14 +67,43 @@ pacmanGameBoard =
         ++ [(x, 0.0) | x <- [0.30, 0.35, 0.40]]           -- Horizontal top part of U
         ++ [(x, -0.10) | x <- [0.4, 0.45]]                -- Island in the middle of U
       leftLineMiddle =
-        [(-0.20, y) | y <- [-0.05, 0.0 .. 0.20]]             -- Vertical left part of line
+        [(-0.20, y) | y <- [-0.05, 0.0 .. 0.15]]          -- Vertical left part of line
       rightLineMiddle =
-        [(0.20, y) | y <- [-0.05, 0.0 .. 0.20]]              -- Vertical right part of line
+        [(0.20, y) | y <- [-0.05, 0.0 .. 0.15]]           -- Vertical right part of line
       ghostHouseWalls =
-        [(x, 0.05) | x <- [-0.10, -0.05 .. 0.10]]             -- Horizontal part of ghost house
-        ++ [(0.10, y) | y <- [0.05, 0.10, 0.15]]            -- Vertical left part of ghost house
-        ++ [(-0.10, y) | y <- [0.05, 0.10, 0.15]]           -- Vertical right part of ghost house
-        ++ [(x, 0.15) | x <- [-0.05, 0.05]]        -- Horizontal top part of ghost house
+        [(x, 0.05) | x <- [-0.10, -0.05 .. 0.10]]         -- Horizontal part of ghost house
+        ++ [(0.10, y) | y <- [0.05, 0.10, 0.15]]          -- Vertical left part of ghost house
+        ++ [(-0.10, y) | y <- [0.05, 0.10, 0.15]]         -- Vertical right part of ghost house
+        ++ [(x, 0.15) | x <- [-0.05, 0.05]]               -- Horizontal top part of ghost house
+      middleLeftRectangle =
+        [(x, 0.15) | x <- [-0.30, -0.35, -0.40]]          -- Horizontal top part of U
+        ++ [(x, 0.10) | x <- [-0.30, -0.35, -0.40]]       -- Horizontal top part of U
+      middleRightRectangle =
+        [(x, 0.15) | x <- [0.30, 0.35, 0.40]]             -- Horizontal top part of U
+        ++ [(x, 0.10) | x <- [0.30, 0.35, 0.40]]          -- Horizontal top part of U
+      topLeftL =
+        [(-0.4, y) | y <- [0.25, 0.30 .. 0.40]]           -- Vertical left part of L
+        ++ [(x, 0.4) | x <- [-0.4, -0.35, -0.30]]         -- Horizontal top part of L
+      topRightL =
+        [(0.4, y) | y <- [0.25, 0.30 .. 0.40]]            -- Vertical right part of L
+        ++ [(x, 0.4) | x <- [0.4, 0.35, 0.30]]            -- Horizontal top part of L
+      middleRectangleTopLeft =
+        [(x, 0.25) | x <- [-0.30, -0.25, -0.20]]          -- Horizontal part of line
+        ++ [(x, 0.30) | x <- [-0.30, -0.25, -0.20]]       -- Horizontal top part of line
+      middleRectangleTopRight =
+        [(x, 0.25) | x <- [0.20, 0.25, 0.30]]             -- Horizontal part of line
+        ++ [(x, 0.30) | x <- [0.30, 0.25, 0.20]]          -- Horizontal top part of line
+      topT =
+        [(x, 0.25) | x <- [-0.10, -0.05 .. 0.10]]         -- Horizontal part of T
+        ++ [(0.0, y) | y <- [0.25, 0.30 .. 0.40]]         -- Vertical part of T
+      topZLeft =
+        [(x, 0.40) | x <- [-0.20, -0.15, -0.10]]          -- Horizontal middle part
+        ++ [(x, 0.45) | x <- [-0.20]]                     -- Horizontal top part
+        ++ [(x, 0.35 ) | x <- [-0.10]]                    -- Horizontal bottom part
+      topZRight =
+        [(x, 0.40) | x <- [0.20, 0.15, 0.10]]             -- Horizontal middle part
+        ++ [(x, 0.45) | x <- [0.20]]                      -- Horizontal top part
+        ++ [(x, 0.35) | x <- [0.10]]                      -- Horizontal bottom part
 
 validGameBoard :: GameBoard
 validGameBoard =

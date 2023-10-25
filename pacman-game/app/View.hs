@@ -28,8 +28,8 @@ wallToPicture = positionToRect
     positionToRect (x, y) =
         Translate (x * 200) (y * 200) $ Pictures [border, wall]
       where
-        border = Color white $ rectangleSolid 9 9  -- slightly larger for the border
-        wall   = Color blue  $ rectangleSolid 8 8  -- original wall
+        border = Color white $ rectangleSolid 8 8  -- slightly larger for the border
+        wall   = Color blue  $ rectangleSolid 7 7  -- original wall
 
 
 -- Convert a food into a Picture
