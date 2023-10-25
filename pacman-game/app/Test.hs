@@ -3,6 +3,7 @@ module Test where
 import Boards
 import Model (Food, GameBoard (..), Wall, isPositionFree, isPositionInBounds, isPositionFreeOfWalls, movePacman, initPacman, Pacman (..), Direction (..))
 import Test.HUnit
+import Boards (invalidGameBoard)
 
 -- Test if any food is placed inside a wall
 testIsPositionFreeValid :: Test
@@ -45,7 +46,7 @@ testCorrectNumberOfWallsValid =
     assertEqual
       "Correct number of walls for valid board"
       True
-      (length (walls validGameBoard) == 44)
+      (length (walls invalidGameBoard) == 44)
 
 testInitPacman :: Test
 testInitPacman =

@@ -7,14 +7,21 @@ validGameBoard =
     { walls =
         -- Left side
         [(-0.5, y) | y <- [-0.5, -0.4 .. 0.5]]
-          -- Top side
-          ++ [(x, 0.5) | x <- [-0.5, -0.4 .. 0.5]]
-          -- Right side
-          ++ [(0.5, y) | y <- [-0.5, -0.4 .. 0.5]]
-          -- Bottom side
-          ++ [(x, -0.5) | x <- [-0.5, -0.4 .. 0.5]],
+        -- Top side
+        ++ [(x, 0.5) | x <- [-0.5, -0.4 .. 0.5]]
+        -- Right side
+        ++ [(0.5, y) | y <- [-0.5, -0.4 .. 0.5]]
+        -- Bottom side
+        ++ [(x, -0.5) | x <- [-0.5, -0.4 .. 0.5]]
+        -- Some internal vertical walls
+        ++ [(-0.3, y) | y <- [0.0, 0.1, 0.2]]
+        ++ [(0.3, y) | y <- [-0.2, -0.1, 0.0]]
+        -- Some internal horizontal walls
+        ++ [(x, 0.3) | x <- [-0.2, -0.1, 0.0]]
+        ++ [(x, -0.1) | x <- [0.1, 0.2, 0.3]],
       foods = [(0.0, 0.0)] -- Single food in the center for now
     }
+
 
 invalidGameBoard :: GameBoard
 invalidGameBoard =
