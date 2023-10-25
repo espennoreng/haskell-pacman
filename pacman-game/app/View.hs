@@ -13,9 +13,14 @@ import Graphics.Gloss
       Color,
       Picture(Translate, Color, Pictures) )
 import Model
+    ( Food,
+      Wall,
+      GameBoard(GameBoard),
+      Pacman(position),
+      GameState(GameState) )
 
 window :: Display -- The window that will be displayed.
-window = InWindow "My Gloss Game" (400, 300) (10, 10)
+window = InWindow "Haskell Pacman" (400, 300) (10, 10)
 
 background :: Color -- The background color.
 background = black
