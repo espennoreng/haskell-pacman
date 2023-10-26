@@ -20,7 +20,8 @@ data Direction = Up | Down | Left | Right deriving (Eq, Show)
 
 data Pacman = Pacman
   { position :: Position, -- The position of the pacman.
-    direction :: Direction -- The direction of the pacman.
+    direction :: Direction, -- The direction of the pacman.
+    lastSuccessfulDirection :: Direction
   }
   deriving (Eq, Show)
 
@@ -30,7 +31,8 @@ data Ghost = Ghost
   { ghostType :: GhostType, -- The type of the ghost.
     ghostPosition :: Position, -- The position of the ghost.
     ghostDirection :: Direction, -- The direction of the ghost.
-    ghostMode :: GhostMode -- The mode of the ghost.
+    ghostMode :: GhostMode, -- The mode of the ghost.
+    ghostLastSuccessfulDirection :: Direction
   }
   deriving (Eq, Show)
 
@@ -50,10 +52,10 @@ newtype GameBoard = GameBoard
 
 initGhosts :: [Ghost]
 initGhosts =
-  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Up, ghostMode = Chase},
-    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Down, ghostMode = Chase},
-    Ghost {ghostType = Inky, ghostPosition = (-0.05, 0.10), ghostDirection = Model.Up, ghostMode = Chase},
-    Ghost {ghostType = Clyde, ghostPosition = (0.05, 0.10), ghostDirection = Model.Up, ghostMode = Chase}
+  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Up, ghostMode = Chase, ghostLastSuccessfulDirection = Model.Up},
+    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Down, ghostMode = Chase, ghostLastSuccessfulDirection = Model.Down},
+    Ghost {ghostType = Inky, ghostPosition = (-0.05, 0.10), ghostDirection = Model.Up, ghostMode = Chase, ghostLastSuccessfulDirection = Model.Up},
+    Ghost {ghostType = Clyde, ghostPosition = (0.05, 0.10), ghostDirection = Model.Up, ghostMode = Chase, ghostLastSuccessfulDirection = Model.Up}
   ]
 
 pacmanAndGhostRadius :: Float
@@ -84,7 +86,7 @@ initGameState =
     }
 
 initPacman :: Pacman -- Initialize the pacman in the center facing right.
-initPacman = Pacman {position = (0.0, 0.0), direction = Model.Down}
+initPacman = Pacman {position = (0.0, 0.0), direction = Model.Down, lastSuccessfulDirection = Model.Down}
 
 -- TODO: Make sure that food is not placed inside the ghost house.
 makeFoodOnEveryAvailablePosition :: GameBoard -> [Food]
@@ -98,37 +100,47 @@ isPositionFree board position =
 
 -- Define a data type to encapsulate the logic of movement-related fields
 data Movable a = Movable
-  { getPosition     :: a -> Position
-  , getDirection    :: a -> Direction
-  , setPosition     :: Position -> a -> a
-  }
+    { getPosition     :: a -> Position
+    , getDirection    :: a -> Direction
+    , setPosition     :: Position -> a -> a
+    , getLastSuccessfulDirection :: a -> Direction
+    , setLastSuccessfulDirection :: Direction -> a -> a
+    }
+
 
 moveEntity :: Movable a -> GameBoard -> a -> a
 moveEntity movable board entity =
-  let proposedPosition = calculateNewPosition (getPosition movable entity) (getDirection movable entity)
-   in if isPositionFreeOfWalls board (getPosition movable entity) (getDirection movable entity)
-        then setPosition movable proposedPosition entity
-        else entity
+    let proposedPosition = calculateNewPosition (getPosition movable entity) (getDirection movable entity)
+    in if isPositionFreeOfWalls board (getPosition movable entity) (getDirection movable entity)
+        then setPosition movable proposedPosition (setLastSuccessfulDirection movable (getDirection movable entity) entity)
+        else let fallbackPosition = calculateNewPosition (getPosition movable entity) (getLastSuccessfulDirection movable entity)
+             in if isPositionFreeOfWalls board (getPosition movable entity) (getLastSuccessfulDirection movable entity)
+                 then setPosition movable fallbackPosition entity
+                 else entity
 
--- Create instances of Movable for Pacman and Ghost
+
 pacmanMovable :: Movable Pacman
 pacmanMovable = Movable
-  { getPosition     = position
-  , getDirection    = direction
-  , setPosition     = \newPos p -> p {position = newPos}
-  }
+    { getPosition = position
+    , getDirection = direction
+    , setPosition = \newPos p -> p {position = newPos}
+    , getLastSuccessfulDirection = lastSuccessfulDirection
+    , setLastSuccessfulDirection = \dir p -> p {lastSuccessfulDirection = dir}
+    }
 
 ghostMovable :: Movable Ghost
 ghostMovable = Movable
-  { getPosition     = ghostPosition
-  , getDirection    = ghostDirection
-  , setPosition     = \newPos g -> g {ghostPosition = newPos}
-  }
+    { getPosition = ghostPosition
+    , getDirection = ghostDirection
+    , setPosition = \newPos g -> g {ghostPosition = newPos}
+    , getLastSuccessfulDirection = ghostLastSuccessfulDirection
+    , setLastSuccessfulDirection = \dir g -> g {ghostLastSuccessfulDirection = dir}
+    }
+
 
 -- New functions using the generalized moveEntity function
 movePacman :: GameBoard -> Pacman -> Pacman
 movePacman = moveEntity pacmanMovable
-
 
 
 type Visited = Set.Set Position
@@ -340,7 +352,6 @@ pacmanGameBoard =
       [(x, 0.05) | x <- [-0.10, -0.05 .. 0.10]] -- Horizontal part of ghost house
         ++ [(0.10, y) | y <- [0.05, 0.10, 0.15]] -- Vertical left part of ghost house
         ++ [(-0.10, y) | y <- [0.05, 0.10, 0.15]] -- Vertical right part of ghost house
-        ++ [(x, 0.15) | x <- [-0.05, 0.05]] -- Horizontal top part of ghost house
     middleLeftRectangle =
       [(x, 0.15) | x <- [-0.30, -0.35, -0.40]] -- Horizontal top part of U
         ++ [(x, 0.10) | x <- [-0.30, -0.35, -0.40]] -- Horizontal top part of U
