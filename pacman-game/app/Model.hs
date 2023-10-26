@@ -1,4 +1,5 @@
 module Model where
+import Data.Foldable (minimumBy)
 
 -- Mostly board related functions and types.
 type Position = (Float, Float) -- Represents a point in the game.
@@ -19,11 +20,12 @@ data Pacman = Pacman
   deriving (Eq, Show)
 
 data GhostType = Blinky | Pinky | Inky | Clyde deriving (Eq, Show)
-
+data GhostMode = Chase | Scatter | Frightened deriving (Eq, Show)
 data Ghost = Ghost
   { ghostType :: GhostType, -- The type of the ghost.
     ghostPosition :: Position, -- The position of the ghost.
-    ghostDirection :: Direction -- The direction of the ghost.
+    ghostDirection :: Direction, -- The direction of the ghost.
+    ghostMode :: GhostMode -- The mode of the ghost.
   }
   deriving (Eq, Show)
 
@@ -41,10 +43,10 @@ newtype GameBoard = GameBoard
 
 initGhosts :: [Ghost]
 initGhosts =
-  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Up},
-    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Down},
-    Ghost {ghostType = Inky, ghostPosition = (-0.05, 0.10), ghostDirection = Model.Up},
-    Ghost {ghostType = Clyde, ghostPosition = (0.05, 0.10), ghostDirection = Model.Up}
+  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Up, ghostMode = Chase},
+    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Down, ghostMode = Chase},
+    Ghost {ghostType = Inky, ghostPosition = (-0.05, 0.10), ghostDirection = Model.Up, ghostMode = Chase},
+    Ghost {ghostType = Clyde, ghostPosition = (0.05, 0.10), ghostDirection = Model.Up, ghostMode = Chase}
   ]
 
 pacmanAndGhostRadius :: Float
@@ -86,8 +88,7 @@ isPositionFree :: GameBoard -> Position -> Bool
 isPositionFree board position =
   isPositionInBounds position && not (any (intersects position) (walls board))
 
--- Define a data type to encapsulate the logic of movement-related fields (EXPLAIN THIS BETTER)
--- Here there where some equal logic so we created a data type to encapsulate it
+-- Define a data type to encapsulate the logic of movement-related fields
 data Movable a = Movable
   { getPosition     :: a -> Position
   , getDirection    :: a -> Direction
@@ -120,8 +121,35 @@ ghostMovable = Movable
 movePacman :: GameBoard -> Pacman -> Pacman
 movePacman = moveEntity pacmanMovable
 
-moveGhost :: GameBoard -> Ghost -> Ghost
-moveGhost = moveEntity ghostMovable
+-- Blinky related functions and types.
+-- Get the target for Blinky, which is the position of the pacman.
+getBlinkyTarget :: Pacman -> Position
+getBlinkyTarget = position
+
+-- Calculate the Manhattan distance between two positions.
+manhattanDistance :: Position -> Position -> Float
+manhattanDistance (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
+
+-- Get the next move for Blinky, which will try to minimize the distance to its target.
+getNextMove :: GameBoard -> Ghost -> Position -> Direction
+getNextMove board ghost target =
+  let currentPos = ghostPosition ghost
+      possibleDirections = filter (validMove board currentPos) [Up, Down, Model.Left, Model.Right]
+  in minimumBy (\dir1 dir2 -> compare (manhattanDistance (calculateNewPosition currentPos dir1) target)
+                                         (manhattanDistance (calculateNewPosition currentPos dir2) target)) possibleDirections
+
+moveBlinky :: GameBoard -> Pacman -> Ghost -> Ghost
+moveBlinky board pacman blinky =
+  if ghostMode blinky == Chase
+    then moveEntity ghostMovable board blinky {ghostDirection = getNextMove board blinky (getBlinkyTarget pacman)}
+    else blinky  -- for simplicity, keep direction unchanged in other modes (At least for now)
+
+moveGhosts :: GameBoard -> Pacman -> [Ghost] -> [Ghost]
+moveGhosts board pacman = map (\ghost ->
+  case ghostType ghost of
+    Blinky -> moveBlinky board pacman ghost
+    _ -> ghost -- for simplicity, keep other ghosts unchanged
+  )
 
 
 validMove :: GameBoard -> Position -> Direction -> Bool
@@ -152,7 +180,7 @@ pacmanGameBoard =
           ++ rightMiddleU
           ++ leftLineMiddle
           ++ rightLineMiddle
-          ++ ghostHouseWalls
+          -- ++ ghostHouseWalls
           ++ middleLeftRectangle
           ++ middleRightRectangle
           ++ topLeftL
@@ -273,3 +301,22 @@ invalidGameBoard =
           -- Bottom side
           ++ [(x, -0.5) | x <- [-0.5, -0.4 .. 0.5]]
     }
+
+-- A board with walls on each side and a line in the middle.
+testBoard :: GameBoard
+testBoard =
+  GameBoard 
+    {walls
+      = -- Left side
+        [(-0.5, y) | y <- [-0.5, -0.45 .. 0.5]]
+          -- Top side
+          ++ [(x, 0.5) | x <- [-0.5, -0.45 .. 0.5]]
+          -- Right side
+          ++ [(0.5, y) | y <- [-0.5, -0.45 .. 0.5]]
+          -- Bottom side
+          ++ [(x, -0.5) | x <- [-0.5, -0.45 .. 0.5]]
+          -- Some internal vertical walls
+          ++ [(-0.3, y) | y <- [0.0, 0.1, 0.2]]
+          ++ [(0.3, y) | y <- [-0.2, -0.1, 0.0]]
+    }
+        

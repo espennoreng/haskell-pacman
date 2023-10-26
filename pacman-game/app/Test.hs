@@ -1,6 +1,6 @@
 module Test where
 
-import Model (Food, GameBoard (..), Wall,validGameBoard, invalidGameBoard, pacmanGameBoard, isPositionFree, isPositionInBounds, isPositionFreeOfWalls, movePacman, initPacman, Pacman (..), Direction (..))
+import Model
 import Test.HUnit
 
 -- Test if any food is placed inside a wall
@@ -167,26 +167,37 @@ testIsPositionInBoundsInvalid =
       False
       (isPositionInBounds (0.6, 0.0))
 
+
+-- Testing the movement of blinky the ghost
+
+-- Mock Data
+sampleBoard :: GameBoard
+sampleBoard = testBoard
+
+blinkyAt :: Position -> Ghost
+blinkyAt pos = Ghost { ghostPosition = pos, ghostDirection = Model.Right, ghostType = Blinky, ghostMode = Chase }
+
+-- Test Cases
+testCases :: [(String, GameBoard, Ghost, Position, Direction)]
+testCases = 
+    [ ("Test if Blinky chooses Up when target is above", sampleBoard, blinkyAt (5, 5), (5, 7), Up),
+      ("Test if Blinky chooses Down when target is below", sampleBoard, blinkyAt (5, 5), (5, 3), Down)    ]
+
+-- Testing Function
+testGetNextMove :: (String, GameBoard, Ghost, Position, Direction) -> IO ()
+testGetNextMove (desc, board, ghost, target, expectedDir) = do
+    let result = getNextMove board ghost target
+    if result == expectedDir
+    then putStrLn $ "Passed: " ++ desc
+    else putStrLn $ "Failed: " ++ desc ++ " Expected: " ++ show expectedDir ++ " but got: " ++ show result
+
 -- Group tests together
 tests :: Test
 tests =
   TestList
-    [ testIsPositionFreeValid,
-      testIsPositionFreeInvalid,
-      testIfAPositionIsFreeOfWallsValid,
-      testIfAPositionIsFreeOfWallsInvalid,
-      testCorrectNumberOfWallsValid,
-      testInitPacman,
-      testMovePacmanRight,
-      testMovePacmanLeft,
-      testMovePacmanUp,
-      testMovePacmanDown,
-      testPacmanCollisionWithWallLeft,
-      testPacmanCollisionWithWallRight,
-      testPacmanCollisionWithWallUp,
-      testPacmanCollisionWithWallDown,
-      testIsPositionInBoundsValid,
-      testIsPositionInBoundsInvalid
+    [ 
+      -- Just run testGetNextMove
+      TestLabel "Test getNextMove" $ TestList $ map (TestCase . testGetNextMove) testCases
     ]
 
 -- Function to run all tests

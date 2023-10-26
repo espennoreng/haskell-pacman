@@ -6,7 +6,7 @@ import Graphics.Gloss.Interface.Pure.Game
       Event(EventKey),
       SpecialKey(KeyRight, KeyUp, KeyDown, KeyLeft) )
 import Model
-    ( movePacman, moveGhost, Direction(Right, Up, Down, Left), Pacman(direction), Food, pacmanGameBoard, GameState (GameState, pacman, ghosts) )
+    ( movePacman, Direction(Right, Up, Down, Left), Pacman(direction), Food, pacmanGameBoard, testBoard, GameState (GameState, pacman, ghosts), moveGhosts )
 import View ( gameBoardToPicture )
 
 handleInput :: Event -> GameState -> GameState
@@ -22,10 +22,11 @@ handleInput _ gameState = gameState -- don't change anything for other events
 
 
 render :: GameState -> Picture
-render = gameBoardToPicture pacmanGameBoard
+render = gameBoardToPicture testBoard
+
 update :: Float -> GameState -> GameState
 update _ gameState@(GameState pacman food ghosts) =
     -- Update Pacman and Ghosts positions
-    let updatedPacman = movePacman pacmanGameBoard pacman
-        updatedGhosts = map (moveGhost pacmanGameBoard) ghosts
+    let updatedPacman = movePacman testBoard pacman
+        updatedGhosts = moveGhosts testBoard pacman ghosts
     in gameState { pacman = updatedPacman, ghosts = updatedGhosts }

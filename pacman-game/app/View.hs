@@ -41,7 +41,7 @@ pacmanToPicture :: Pacman -> Picture
 pacmanToPicture pacman = translatePosition (position pacman) $ Color yellow $ circleSolid 4
 
 ghostToPicture :: Ghost -> Picture
-ghostToPicture (Ghost kind pos _) = translatePosition pos $ Color (ghostColor kind) $ circleSolid 4
+ghostToPicture (Ghost kind pos _ _) = translatePosition pos $ Color (ghostColor kind) $ circleSolid 4
   where
     ghostColor Blinky = red
     ghostColor Pinky  = rose
