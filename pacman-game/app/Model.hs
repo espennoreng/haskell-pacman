@@ -10,6 +10,8 @@ import qualified Data.Set as Set
 ----------------------------------------
 -- Data types
 ----------------------------------------
+-- Score
+type Score = Int
 -- Board
 type Position = (Float, Float)
 
@@ -40,20 +42,21 @@ data GhostType = Blinky | Pinky | Inky | Clyde deriving (Eq, Show)
 data GhostMode = Chase | Scatter | Frightened deriving (Eq, Show)
 
 data Ghost = Ghost
-  { ghostType :: GhostType, -- The type of the ghost.
-    ghostPosition :: Position, -- The position of the ghost.
-    ghostDirection :: Direction, -- The direction of the ghost.
-    ghostMode :: GhostMode, -- The mode of the ghost.
+  { ghostType :: GhostType,
+    ghostPosition :: Position,
+    ghostDirection :: Direction,
+    ghostMode :: GhostMode,
     ghostLastSuccessfulDirection :: Direction
   }
   deriving (Eq, Show)
 
 -- Game state
 data GameState = GameState
-  { pacman :: Pacman, -- The pacman.
-    food :: [Food], -- The food.
-    ghosts :: [Ghost], -- The ghosts.
-    randGen :: StdGen
+  { pacman :: Pacman,
+    food :: [Food],
+    ghosts :: [Ghost],
+    randGen :: StdGen,
+    score :: Score
   }
   deriving (Eq, Show)
 
@@ -191,7 +194,8 @@ initGameState =
     { pacman = initPacman,
       food = makeFoodOnEveryAvailablePosition pacmanGameBoard,
       ghosts = initGhosts,
-      randGen = mkStdGen 0
+      randGen = mkStdGen 0,
+      score = 0
     }
 
 isPositionInBounds :: (Ord a1, Ord a2, Fractional a1, Fractional a2) => (a1, a2) -> Bool
