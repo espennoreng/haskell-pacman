@@ -91,6 +91,15 @@ pacmanMovable =
       setLastSuccessfulDirection = \dir p -> p {lastSuccessfulDirection = dir}
     }
 
+pacmanEatsFood :: Pacman -> [Food] -> (Bool, [Food])
+pacmanEatsFood pacman food =
+  let pacmanPos = position pacman
+      foodEaten = find (intersects pacmanPos) food
+    in case foodEaten of
+          Just f -> (True, filter (/= f) food)
+          Nothing -> (False, food)
+
+
 ----------------------------------------
 -- Ghost functions
 ----------------------------------------
@@ -363,6 +372,8 @@ testBoard =
 ----------------------------------------
 -- Helper functions
 ----------------------------------------
+
+
 
 validMove :: GameBoard -> Position -> Direction -> Bool
 validMove board position proposedDirection =

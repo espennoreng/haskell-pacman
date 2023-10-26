@@ -1,13 +1,8 @@
 module Controller where
 
 import Graphics.Gloss.Interface.Pure.Game
-    ( Picture,
-      Key(SpecialKey),
-      Event(EventKey),
-      SpecialKey(KeyRight, KeyUp, KeyDown, KeyLeft) )
-import Model
-    ( movePacman, Direction(Right, Up, Down, Left), Pacman(direction), Food, pacmanGameBoard, testBoard, GameState (GameState, pacman, ghosts, randGen), moveGhosts )
-import View ( gameBoardToPicture )
+import Model 
+import View
 
 handleInput :: Event -> GameState -> GameState
 handleInput (EventKey (SpecialKey KeyUp) _ _ _) (GameState pacman food ghosts gen score) =
@@ -25,6 +20,10 @@ render = gameBoardToPicture pacmanGameBoard
 
 update :: Float -> GameState -> GameState
 update _ gameState@(GameState pacman food ghosts gen score) =
-    let updatedPacman = movePacman pacmanGameBoard pacman
+    let 
+        updatedPacman = movePacman pacmanGameBoard pacman
         (updatedGhosts, newGen) = moveGhosts gen pacmanGameBoard pacman ghosts
-    in gameState { pacman = updatedPacman, ghosts = updatedGhosts, randGen = newGen }
+        (foodEaten, newFood) = pacmanEatsFood updatedPacman food
+        scoreIncrement = if foodEaten then 1 else 0
+        newScore = score + scoreIncrement
+    in gameState { pacman = updatedPacman, ghosts = updatedGhosts, randGen = newGen, score = newScore, food = newFood }
