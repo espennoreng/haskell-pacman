@@ -32,13 +32,17 @@ ghostToPicture (Ghost kind pos _ _ _) = translatePosition pos $ Color (ghostColo
     ghostColor Inky   = cyan
     ghostColor Clyde  = orange
 
-gameScoreToPicture :: Int -> Picture -- Placed at the top of the window
+gameScoreToPicture :: Int -> Picture
 gameScoreToPicture score = translate (-100) 110 $ Color white $ Scale 0.1 0.1 $ Text $ "Score: " ++ show score
 
+pacmanLivesToPicture :: Int -> Picture
+pacmanLivesToPicture lives = translate (-100) (-120) $ Color white $ Scale 0.1 0.1 $ Text $ "Lives: " ++ show lives
+
 gameBoardToPicture :: GameBoard -> GameState -> Picture
-gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts _ score) =
+gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts _ score lives) =
     pictures $ [ wallToPicture wall | wall <- walls ]
             ++ [ foodToPicture food | food <- foods ]
             ++ [ pacmanToPicture pacman ]
             ++ [ ghostToPicture ghost | ghost <- ghosts ]
             ++ [ gameScoreToPicture score ]
+            ++ [ pacmanLivesToPicture lives ]

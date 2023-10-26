@@ -3,19 +3,20 @@ module Model where
 import Data.Foldable (minimumBy)
 import Data.List (find)
 import Data.Set (Set)
-
-import System.Random
 import qualified Data.Set as Set
+import System.Random
 
 ----------------------------------------
 -- Data types
 ----------------------------------------
--- Score
-type Score = Int
 -- Board
 type Position = (Float, Float)
 
 type Vector = (Float, Float)
+
+type Score = Int
+
+type Lives = Int
 
 type Wall = Position
 
@@ -56,7 +57,8 @@ data GameState = GameState
     food :: [Food],
     ghosts :: [Ghost],
     randGen :: StdGen,
-    score :: Score
+    score :: Score,
+    lives :: Lives
   }
   deriving (Eq, Show)
 
@@ -95,10 +97,9 @@ pacmanEatsFood :: Pacman -> [Food] -> (Bool, [Food])
 pacmanEatsFood pacman food =
   let pacmanPos = position pacman
       foodEaten = find (intersects pacmanPos) food
-    in case foodEaten of
-          Just f -> (True, filter (/= f) food)
-          Nothing -> (False, food)
-
+   in case foodEaten of
+        Just f -> (True, filter (/= f) food)
+        Nothing -> (False, food)
 
 ----------------------------------------
 -- Ghost functions
@@ -204,7 +205,8 @@ initGameState =
       food = makeFoodOnEveryAvailablePosition pacmanGameBoard,
       ghosts = initGhosts,
       randGen = mkStdGen 0,
-      score = 0
+      score = 0,
+      lives = 3
     }
 
 isPositionInBounds :: (Ord a1, Ord a2, Fractional a1, Fractional a2) => (a1, a2) -> Bool
@@ -372,8 +374,6 @@ testBoard =
 ----------------------------------------
 -- Helper functions
 ----------------------------------------
-
-
 
 validMove :: GameBoard -> Position -> Direction -> Bool
 validMove board position proposedDirection =
