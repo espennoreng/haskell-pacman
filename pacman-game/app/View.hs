@@ -49,7 +49,7 @@ ghostToPicture (Ghost kind pos _ _) = translatePosition pos $ Color (ghostColor 
     ghostColor Clyde  = orange
 
 gameBoardToPicture :: GameBoard -> GameState -> Picture
-gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts) =
+gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts _) =
     pictures $ [ wallToPicture wall | wall <- walls ]
             ++ [ foodToPicture food | food <- foods ]
             ++ [ pacmanToPicture pacman ]

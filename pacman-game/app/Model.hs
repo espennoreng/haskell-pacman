@@ -1,5 +1,10 @@
 module Model where
 import Data.Foldable (minimumBy)
+import Data.List (find)
+import Data.Set (Set)
+import qualified Data.Set as Set
+import System.Random
+
 
 -- Mostly board related functions and types.
 type Position = (Float, Float) -- Represents a point in the game.
@@ -32,7 +37,9 @@ data Ghost = Ghost
 data GameState = GameState
   { pacman :: Pacman, -- The pacman.
     food :: [Food], -- The food.
-    ghosts :: [Ghost] -- The ghosts.
+    ghosts :: [Ghost], -- The ghosts.
+    randGen :: StdGen
+
   }
   deriving (Eq, Show)
 
@@ -72,11 +79,12 @@ initGameState =
   GameState
     { pacman = initPacman,
       food = makeFoodOnEveryAvailablePosition pacmanGameBoard,
-      ghosts = initGhosts
+      ghosts = initGhosts,
+      randGen = mkStdGen 0
     }
 
 initPacman :: Pacman -- Initialize the pacman in the center facing right.
-initPacman = Pacman {position = (0.0, 0.0), direction = Model.Right}
+initPacman = Pacman {position = (0.0, 0.0), direction = Model.Down}
 
 -- TODO: Make sure that food is not placed inside the ghost house.
 makeFoodOnEveryAvailablePosition :: GameBoard -> [Food]
@@ -121,47 +129,142 @@ ghostMovable = Movable
 movePacman :: GameBoard -> Pacman -> Pacman
 movePacman = moveEntity pacmanMovable
 
+
+
+type Visited = Set.Set Position
+
+bfs :: GameBoard -> Position -> Position -> [Direction]
+bfs board start target = bfsHelper board [(start, [])] target Set.empty
+
+bfsHelper :: GameBoard -> [(Position, [Direction])] -> Position -> Visited -> [Direction]
+bfsHelper board [] _ _ = []  -- Empty list means no path found.
+bfsHelper board ((currentPosition, path):rest) target visited
+    | currentPosition == target = path
+    | otherwise =
+        let neighbors = filter (`Set.notMember` visited) $ adjacentPositions board currentPosition
+            newVisited = Set.insert currentPosition visited
+            updatedPaths = [(pos, path ++ [directionForMove currentPosition pos]) | pos <- neighbors]
+        in bfsHelper board (rest ++ updatedPaths) target newVisited
+
+adjacentPositions :: GameBoard -> Position -> [Position]
+adjacentPositions board pos =
+  [newPos | dir <- [Up, Down, Model.Left, Model.Right], isPositionFreeOfWalls board pos dir, let newPos = calculateNewPosition pos dir]
+
+directionForMove :: Position -> Position -> Direction
+directionForMove (x1, y1) (x2, y2)
+    | y2 > y1   = Up
+    | y2 < y1   = Down
+    | x2 > x1   = Model.Right
+    | x2 < x1   = Model.Left
+    | otherwise = error "Invalid move"
+
+getNextMoveBFS :: GameBoard -> Ghost -> Position -> Direction
+getNextMoveBFS board blinky target =
+    case bfs board (ghostPosition blinky) target of
+        [] -> ghostDirection blinky  -- No path found, keep current direction.
+        (dir:_) -> dir
+
+validMoveAhead :: Int -> Direction -> Position -> Position
+validMoveAhead 0 _ pos = pos
+validMoveAhead n dir pos = validMoveAhead (n-1) dir (calculateNewPosition pos dir)
+
 -- Blinky related functions and types.
 -- Get the target for Blinky, which is the position of the pacman.
 getBlinkyTarget :: Pacman -> Position
 getBlinkyTarget = position
 
--- Calculate the Manhattan distance between two positions.
-manhattanDistance :: Position -> Position -> Float
-manhattanDistance (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
+getPinkyTarget :: Pacman -> Position
+getPinkyTarget pacman = validMoveAhead 4 (direction pacman) (position pacman)
 
--- Get the next move for Blinky, which will try to minimize the distance to its target.
-getNextMove :: GameBoard -> Ghost -> Position -> Direction
-getNextMove board ghost target =
-  let currentPos = ghostPosition ghost
-      possibleDirections = filter (validMove board currentPos) [Up, Down, Model.Left, Model.Right]
-  in minimumBy (\dir1 dir2 -> compare (manhattanDistance (calculateNewPosition currentPos dir1) target)
-                                         (manhattanDistance (calculateNewPosition currentPos dir2) target)) possibleDirections
+-- The vector from Blinky to that point is then doubled.
+getInkyTarget :: Pacman -> Position -> Position -- We need Blinky's current position as an additional argument.
+getInkyTarget pacman blinkyPos =
+  let
+    twoAheadOfPacman = validMoveAhead 2 (direction pacman) (position pacman)
+    deltaX = fst twoAheadOfPacman - fst blinkyPos
+    deltaY = snd twoAheadOfPacman - snd blinkyPos
+  in
+    (fst twoAheadOfPacman + 2 * deltaX, snd twoAheadOfPacman + 2 * deltaY)
+
+-- Function to find a specific ghost from a list of ghosts
+findGhost :: GhostType -> [Ghost] -> Ghost
+findGhost _ [] = error "No ghosts found"
+findGhost gType (ghost:rest) =
+  if ghostType ghost == gType
+    then ghost
+    else findGhost gType rest
+
+
+moveInky :: GameBoard -> Pacman -> Ghost -> [Ghost] -> Ghost
+moveInky board pacman inky allGhosts =
+    let
+        blinkyPos = ghostPosition (findGhost Blinky allGhosts)
+        target = getInkyTarget pacman blinkyPos
+        newDirection = getNextMoveBFS board inky target
+    in
+        moveEntity ghostMovable board inky { ghostDirection = newDirection }
 
 moveBlinky :: GameBoard -> Pacman -> Ghost -> Ghost
 moveBlinky board pacman blinky =
   if ghostMode blinky == Chase
-    then moveEntity ghostMovable board blinky {ghostDirection = getNextMove board blinky (getBlinkyTarget pacman)}
+    then moveEntity ghostMovable board blinky {ghostDirection = getNextMoveBFS board blinky (getBlinkyTarget pacman)}
     else blinky  -- for simplicity, keep direction unchanged in other modes (At least for now)
 
-moveGhosts :: GameBoard -> Pacman -> [Ghost] -> [Ghost]
-moveGhosts board pacman = map (\ghost ->
-  case ghostType ghost of
-    Blinky -> moveBlinky board pacman ghost
-    _ -> ghost -- for simplicity, keep other ghosts unchanged
-  )
+movePinky :: GameBoard -> Pacman -> Ghost -> Ghost
+movePinky board pacman pinky =
+  if ghostMode pinky == Chase
+    then moveEntity ghostMovable board pinky {ghostDirection = getNextMoveBFS board pinky (getPinkyTarget pacman)}
+    else pinky  -- for simplicity, keep direction unchanged in other modes (At least for now)
+
+shouldChase :: StdGen -> (Bool, StdGen)
+shouldChase gen =
+    let (n, newGen) = randomR (1 :: Int, 10) gen
+    in (n > 5, newGen)
+
+moveClyde :: StdGen -> GameBoard -> Pacman -> Ghost -> (Ghost, StdGen)
+moveClyde gen board pacman clyde =
+    let (shouldChasePacman, newGen1) = shouldChase gen
+        (movedClyde, newGen2) 
+            | shouldChasePacman = (moveEntity ghostMovable board clyde { ghostDirection = getNextMoveBFS board clyde (getBlinkyTarget pacman) }, newGen1)
+            | otherwise = moveClydeRandomly newGen1 board clyde
+    in (movedClyde, newGen2)
+
+moveClydeRandomly :: StdGen -> GameBoard -> Ghost -> (Ghost, StdGen)
+moveClydeRandomly gen board clyde =
+    let
+        (n, newGen) = randomR (1 :: Int, 4) gen
+        newDirection = case n of
+            1 -> Up
+            2 -> Down
+            3 -> Model.Left
+            4 -> Model.Right
+            _ -> error "Invalid random number"
+    in
+        (moveEntity ghostMovable board clyde { ghostDirection = newDirection }, newGen)
+
+moveGhosts :: StdGen -> GameBoard -> Pacman -> [Ghost] -> ([Ghost], StdGen)
+moveGhosts gen board pacman ghosts =
+  let
+    blinky = findGhost Blinky ghosts
+    pinky = findGhost Pinky ghosts
+    inky = findGhost Inky ghosts
+    clyde = findGhost Clyde ghosts
+    (newClyde, newGen) = moveClyde gen board pacman clyde
+  in
+    ([moveBlinky board pacman blinky, movePinky board pacman pinky, moveInky board pacman inky ghosts, newClyde], newGen)
+
 
 
 validMove :: GameBoard -> Position -> Direction -> Bool
 validMove board position proposedDirection =
   let newPos = calculateNewPosition position proposedDirection
-   in isPositionFreeOfWalls board position proposedDirection
+   in isPositionFreeOfWalls board newPos proposedDirection
 
 calculateNewPosition :: Position -> Direction -> Position
 calculateNewPosition (x, y) proposedDirection =
   case proposedDirection of
     Up -> (x, y + 0.05)
-    Down -> (x, y - 0.05)
+    Model.Down -> (x, y - 0.05)
     Model.Left -> (x - 0.05, y)
     Model.Right -> (x + 0.05, y)
 
@@ -180,7 +283,7 @@ pacmanGameBoard =
           ++ rightMiddleU
           ++ leftLineMiddle
           ++ rightLineMiddle
-          -- ++ ghostHouseWalls
+          ++ ghostHouseWalls
           ++ middleLeftRectangle
           ++ middleRightRectangle
           ++ topLeftL
@@ -305,7 +408,7 @@ invalidGameBoard =
 -- A board with walls on each side and a line in the middle.
 testBoard :: GameBoard
 testBoard =
-  GameBoard 
+  GameBoard
     {walls
       = -- Left side
         [(-0.5, y) | y <- [-0.5, -0.45 .. 0.5]]
@@ -319,4 +422,3 @@ testBoard =
           ++ [(-0.3, y) | y <- [0.0, 0.1, 0.2]]
           ++ [(0.3, y) | y <- [-0.2, -0.1, 0.0]]
     }
-        

@@ -2,6 +2,7 @@ module Test where
 
 import Model
 import Test.HUnit
+import Model (getNextMoveBFS)
 
 -- Test if any food is placed inside a wall
 testIsPositionFreeValid :: Test
@@ -186,7 +187,7 @@ testCases =
 -- Testing Function
 testGetNextMove :: (String, GameBoard, Ghost, Position, Direction) -> IO ()
 testGetNextMove (desc, board, ghost, target, expectedDir) = do
-    let result = getNextMove board ghost target
+    let result = getNextMoveBFS board ghost target
     if result == expectedDir
     then putStrLn $ "Passed: " ++ desc
     else putStrLn $ "Failed: " ++ desc ++ " Expected: " ++ show expectedDir ++ " but got: " ++ show result
