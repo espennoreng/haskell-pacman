@@ -6,23 +6,26 @@ import Graphics.Gloss.Interface.Pure.Game
       Event(EventKey),
       SpecialKey(KeyRight, KeyUp, KeyDown, KeyLeft) )
 import Model
-    ( movePacman, Direction(Right, Up, Down, Left), Pacman(direction), Food, pacmanGameBoard, GameState (GameState) )
+    ( movePacman, moveGhost, Direction(Right, Up, Down, Left), Pacman(direction), Food, pacmanGameBoard, GameState (GameState, pacman, ghosts) )
 import View ( gameBoardToPicture )
 
 handleInput :: Event -> GameState -> GameState
-handleInput (EventKey (SpecialKey KeyUp) _ _ _) (GameState pacman food) = 
-    GameState (pacman {direction = Model.Up}) food
-handleInput (EventKey (SpecialKey KeyDown) _ _ _) (GameState pacman food) = 
-    GameState (pacman {direction = Model.Down}) food
-handleInput (EventKey (SpecialKey KeyLeft) _ _ _) (GameState pacman food) = 
-    GameState (pacman {direction = Model.Left}) food
-handleInput (EventKey (SpecialKey KeyRight) _ _ _) (GameState pacman food) = 
-    GameState (pacman {direction = Model.Right}) food
+handleInput (EventKey (SpecialKey KeyUp) _ _ _) (GameState pacman food ghosts) =
+    GameState (pacman {direction = Model.Up}) food ghosts
+handleInput (EventKey (SpecialKey KeyDown) _ _ _) (GameState pacman food ghosts) = 
+    GameState (pacman {direction = Model.Down}) food ghosts
+handleInput (EventKey (SpecialKey KeyLeft) _ _ _) (GameState pacman food ghosts) = 
+    GameState (pacman {direction = Model.Left}) food ghosts
+handleInput (EventKey (SpecialKey KeyRight) _ _ _) (GameState pacman food ghosts) = 
+    GameState (pacman {direction = Model.Right})food ghosts
 handleInput _ gameState = gameState -- don't change anything for other events
 
 
 render :: GameState -> Picture
 render = gameBoardToPicture pacmanGameBoard
-
 update :: Float -> GameState -> GameState
-update _ (GameState pacman food) = GameState (movePacman pacmanGameBoard pacman) food
+update _ gameState@(GameState pacman food ghosts) =
+    -- Update Pacman and Ghosts positions
+    let updatedPacman = movePacman pacmanGameBoard pacman
+        updatedGhosts = map (moveGhost pacmanGameBoard) ghosts
+    in gameState { pacman = updatedPacman, ghosts = updatedGhosts }

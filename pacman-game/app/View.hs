@@ -11,47 +11,46 @@ import Graphics.Gloss
       circleSolid,
       Display(InWindow),
       Color,
-      Picture(Translate, Color, Pictures) )
+      Picture(Translate, Color, Pictures), red, rose, orange )
 import Model
     ( Food,
       Wall,
       GameBoard(GameBoard),
       Pacman(position),
-      GameState(GameState) )
-
-window :: Display -- The window that will be displayed.
+      GameState(GameState), Ghost (Ghost), GhostType (..) )
+window :: Display
 window = InWindow "Haskell Pacman" (400, 300) (10, 10)
 
-background :: Color -- The background color.
+background :: Color
 background = black
 
--- Convert a wall into a Picture
+-- Translate a position into the corresponding visual space
+translatePosition :: (Float, Float) -> Picture -> Picture
+translatePosition (x, y) = Translate (x * 200) (y * 200)
 
 wallToPicture :: Wall -> Picture
-wallToPicture = positionToRect
+wallToPicture wall = translatePosition wall $ Pictures [border, wallPic]
   where
-    positionToRect (x, y) =
-        Translate (x * 200) (y * 200) $ Pictures [border, wall]
-      where
-        border = Color white $ rectangleSolid 8 8  -- slightly larger for the border
-        wall   = Color blue  $ rectangleSolid 7 7  -- original wall
+    border  = Color white $ rectangleSolid 8 8
+    wallPic = Color blue  $ rectangleSolid 7 7
 
-
--- Convert a food into a Picture
 foodToPicture :: Food -> Picture
-foodToPicture = positionToCircle
-  where
-    positionToCircle (x, y) =
-        Translate (x * 200) (y * 200) $ Color cyan $ circleSolid 2
+foodToPicture food = translatePosition food $ Color cyan $ circleSolid 2
 
--- Convert pacman into a Picture
 pacmanToPicture :: Pacman -> Picture
-pacmanToPicture pacman =
-    let (x, y) = position pacman 
-    in Translate (x * 200) (y * 200) $ Color yellow $ circleSolid 4
+pacmanToPicture pacman = translatePosition (position pacman) $ Color yellow $ circleSolid 4
 
+ghostToPicture :: Ghost -> Picture
+ghostToPicture (Ghost kind pos _) = translatePosition pos $ Color (ghostColor kind) $ circleSolid 4
+  where
+    ghostColor Blinky = red
+    ghostColor Pinky  = rose
+    ghostColor Inky   = cyan
+    ghostColor Clyde  = orange
 
--- Convert the game board with walls, foods and pacman into a Picture
 gameBoardToPicture :: GameBoard -> GameState -> Picture
-gameBoardToPicture (GameBoard walls) (GameState pacman food) =
-    pictures $ map wallToPicture walls  ++ map foodToPicture food ++ [pacmanToPicture pacman]
+gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts) =
+    pictures $ [ wallToPicture wall | wall <- walls ]
+            ++ [ foodToPicture food | food <- foods ]
+            ++ [ pacmanToPicture pacman ]
+            ++ [ ghostToPicture ghost | ghost <- ghosts ]
