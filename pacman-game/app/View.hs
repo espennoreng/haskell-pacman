@@ -1,23 +1,7 @@
 module View where
 
 import Graphics.Gloss
-    ( black,
-      blue,
-      cyan,
-      white,
-      yellow,
-      pictures,
-      rectangleSolid,
-      circleSolid,
-      Display(InWindow),
-      Color,
-      Picture(Translate, Color, Pictures), red, rose, orange )
 import Model
-    ( Food,
-      Wall,
-      GameBoard(GameBoard),
-      Pacman(position),
-      GameState(GameState), Ghost (Ghost), GhostType (..) )
 window :: Display
 window = InWindow "Haskell Pacman" (400, 300) (10, 10)
 
