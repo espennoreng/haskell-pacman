@@ -2,7 +2,8 @@ module Test where
 
 import Model
 import Test.HUnit
-import Model (getNextMoveBFS)
+import Model
+import GHC.Base (undefined)
 
 -- Test if any food is placed inside a wall
 testIsPositionFreeValid :: Test
@@ -176,8 +177,7 @@ sampleBoard :: GameBoard
 sampleBoard = testBoard
 
 blinkyAt :: Position -> Ghost
-blinkyAt pos = Ghost { ghostPosition = pos, ghostDirection = Model.Right, ghostType = Blinky, ghostMode = Chase }
-
+blinkyAt pos = undefined
 -- Test Cases
 testCases :: [(String, GameBoard, Ghost, Position, Direction)]
 testCases = 
@@ -185,21 +185,11 @@ testCases =
       ("Test if Blinky chooses Down when target is below", sampleBoard, blinkyAt (5, 5), (5, 3), Down)    ]
 
 -- Testing Function
-testGetNextMove :: (String, GameBoard, Ghost, Position, Direction) -> IO ()
-testGetNextMove (desc, board, ghost, target, expectedDir) = do
-    let result = getNextMoveBFS board ghost target
-    if result == expectedDir
-    then putStrLn $ "Passed: " ++ desc
-    else putStrLn $ "Failed: " ++ desc ++ " Expected: " ++ show expectedDir ++ " but got: " ++ show result
 
 -- Group tests together
 tests :: Test
 tests =
-  TestList
-    [ 
-      -- Just run testGetNextMove
-      TestLabel "Test getNextMove" $ TestList $ map (TestCase . testGetNextMove) testCases
-    ]
+  TestList []
 
 -- Function to run all tests
 runTests :: IO ()

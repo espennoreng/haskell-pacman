@@ -5,6 +5,7 @@ import Data.List (find)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import System.Random
+import Data.Function (on)
 
 ----------------------------------------
 -- Data types
@@ -45,9 +46,7 @@ data GhostMode = Chase | Scatter | Frightened deriving (Eq, Show)
 data Ghost = Ghost
   { ghostType :: GhostType,
     ghostPosition :: Position,
-    ghostDirection :: Direction,
-    ghostMode :: GhostMode,
-    ghostLastSuccessfulDirection :: Direction
+    ghostMode :: GhostMode
   }
   deriving (Eq, Show)
 
@@ -78,7 +77,7 @@ type Visited = Set.Set Position
 -- Pacman functions
 ----------------------------------------
 initPacman :: Pacman -- Initialize the pacman in the center facing right.
-initPacman = Pacman {position = (0.0, 0.0), direction = Model.Down, lastSuccessfulDirection = Model.Down}
+initPacman = Pacman {position = (-0.45, -0.45), direction = Model.Down, lastSuccessfulDirection = Model.Down}
 
 movePacman :: GameBoard -> Pacman -> Pacman
 movePacman = moveEntity pacmanMovable
@@ -101,16 +100,36 @@ pacmanEatsFood pacman food =
         Just f -> (True, filter (/= f) food)
         Nothing -> (False, food)
 
+pacmanLoosesLife :: Pacman -> [Ghost] -> Lives -> Lives
+pacmanLoosesLife pacman ghosts lives =
+  if any (intersects (position pacman) . ghostPosition) ghosts
+    then
+      if lives > 0
+        then lives - 1
+
+        else 0
+    else lives
+
+resetPacmanAndGhosts :: GameState -> GameState
+resetPacmanAndGhosts gameState = gameState
+    { pacman = initPacman,
+      ghosts = initGhosts
+    }
+
 ----------------------------------------
 -- Ghost functions
 ----------------------------------------
 initGhosts :: [Ghost]
 initGhosts =
-  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Up, ghostMode = Chase, ghostLastSuccessfulDirection = Model.Up},
-    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10), ghostDirection = Model.Down, ghostMode = Chase, ghostLastSuccessfulDirection = Model.Down},
-    Ghost {ghostType = Inky, ghostPosition = (-0.05, 0.10), ghostDirection = Model.Up, ghostMode = Chase, ghostLastSuccessfulDirection = Model.Up},
-    Ghost {ghostType = Clyde, ghostPosition = (0.05, 0.10), ghostDirection = Model.Up, ghostMode = Chase, ghostLastSuccessfulDirection = Model.Up}
+  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10)},
+    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10)},
+    Ghost {ghostType = Inky, ghostPosition = (0.0, 0.10)},
+    Ghost {ghostType = Clyde, ghostPosition = (0.0, 0.10)}
   ]
+
+placeGhostsInGhostHouse :: [Ghost] -> [Ghost]
+placeGhostsInGhostHouse ghosts =
+  [ghost {ghostPosition = (0.0, 0.10)} | ghost <- ghosts]
 
 getBlinkyTarget :: Pacman -> Position
 getBlinkyTarget = position
@@ -125,37 +144,40 @@ getInkyTarget pacman blinkyPos =
       deltaY = snd twoAheadOfPacman - snd blinkyPos
    in (fst twoAheadOfPacman + 2 * deltaX, snd twoAheadOfPacman + 2 * deltaY)
 
-moveInky :: GameBoard -> Pacman -> Ghost -> [Ghost] -> Ghost
-moveInky board pacman inky allGhosts =
-  let blinkyPos = ghostPosition (findGhost Blinky allGhosts)
-      target = getInkyTarget pacman blinkyPos
-      newDirection = getNextMoveBFS board inky target
-   in moveEntity ghostMovable board inky {ghostDirection = newDirection}
-
 moveBlinky :: GameBoard -> Pacman -> Ghost -> Ghost
 moveBlinky board pacman blinky =
-  if ghostMode blinky == Chase
-    then moveEntity ghostMovable board blinky {ghostDirection = getNextMoveBFS board blinky (getBlinkyTarget pacman)}
-    else blinky
+  let target = getBlinkyTarget pacman
+      newPos = greedyMove board (ghostPosition blinky) target
+  in blinky { ghostPosition = newPos }
 
 movePinky :: GameBoard -> Pacman -> Ghost -> Ghost
 movePinky board pacman pinky =
-  if ghostMode pinky == Chase
-    then moveEntity ghostMovable board pinky {ghostDirection = getNextMoveBFS board pinky (getPinkyTarget pacman)}
-    else pinky
+  let target = getPinkyTarget pacman
+      newPos = greedyMove board (ghostPosition pinky) target
+  in pinky { ghostPosition = newPos }
+
+moveInky :: GameBoard -> Pacman -> Ghost -> [Ghost] -> Ghost
+moveInky board pacman inky allGhosts =
+  let blinkyPos = ghostPosition $ findGhost Blinky allGhosts
+      target = getInkyTarget pacman blinkyPos
+      newPos = greedyMove board (ghostPosition inky) target
+  in inky { ghostPosition = newPos }
+
+-- Modify moveClyde function to use greedy algorithm when not in random mode
+moveClyde :: StdGen -> GameBoard -> Pacman -> Ghost -> (Ghost, StdGen)
+moveClyde gen board pacman clyde =
+  let (shouldMoveRandomly, newGen) = shouldChase gen
+  in if shouldMoveRandomly
+       then moveClydeRandomly gen board clyde
+       else
+         let target = position pacman
+             newPos = greedyMove board (ghostPosition clyde) target
+         in (clyde { ghostPosition = newPos }, newGen)
 
 shouldChase :: StdGen -> (Bool, StdGen)
 shouldChase gen =
   let (n, newGen) = randomR (1 :: Int, 10) gen
    in (n > 5, newGen)
-
-moveClyde :: StdGen -> GameBoard -> Pacman -> Ghost -> (Ghost, StdGen)
-moveClyde gen board pacman clyde =
-  let (shouldChasePacman, newGen1) = shouldChase gen
-      (movedClyde, newGen2)
-        | shouldChasePacman = (moveEntity ghostMovable board clyde {ghostDirection = getNextMoveBFS board clyde (getBlinkyTarget pacman)}, newGen1)
-        | otherwise = moveClydeRandomly newGen1 board clyde
-   in (movedClyde, newGen2)
 
 moveClydeRandomly :: StdGen -> GameBoard -> Ghost -> (Ghost, StdGen)
 moveClydeRandomly gen board clyde =
@@ -166,7 +188,11 @@ moveClydeRandomly gen board clyde =
         3 -> Model.Left
         4 -> Model.Right
         _ -> error "Invalid random number"
-   in (moveEntity ghostMovable board clyde {ghostDirection = newDirection}, newGen)
+      proposedPosition = calculateNewPosition (ghostPosition clyde) newDirection
+    in if isPositionFreeOfWalls board (ghostPosition clyde) newDirection
+          then (clyde {ghostPosition = proposedPosition}, newGen)
+          else (clyde, newGen)
+
 
 moveGhosts :: StdGen -> GameBoard -> Pacman -> [Ghost] -> ([Ghost], StdGen)
 moveGhosts gen board pacman ghosts =
@@ -177,15 +203,6 @@ moveGhosts gen board pacman ghosts =
       (newClyde, newGen) = moveClyde gen board pacman clyde
    in ([moveBlinky board pacman blinky, movePinky board pacman pinky, moveInky board pacman inky ghosts, newClyde], newGen)
 
-ghostMovable :: Movable Ghost
-ghostMovable =
-  Movable
-    { getPosition = ghostPosition,
-      getDirection = ghostDirection,
-      setPosition = \newPos g -> g {ghostPosition = newPos},
-      getLastSuccessfulDirection = ghostLastSuccessfulDirection,
-      setLastSuccessfulDirection = \dir g -> g {ghostLastSuccessfulDirection = dir}
-    }
 
 findGhost :: GhostType -> [Ghost] -> Ghost
 findGhost _ [] = error "No ghosts found"
@@ -375,6 +392,20 @@ testBoard =
 -- Helper functions
 ----------------------------------------
 
+-- Calculate the Euclidean distance between two positions
+distance :: Position -> Position -> Float
+distance (x1, y1) (x2, y2) =
+  sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+
+-- Calculate the next position for a ghost using a greedy algorithm
+greedyMove :: GameBoard -> Position -> Position -> Position
+greedyMove board currentPos targetPos =
+  let possibleDirections = [Up, Down, Model.Left, Model.Right]
+      possiblePositions =
+        [calculateNewPosition currentPos dir | dir <- possibleDirections, isPositionFreeOfWalls board currentPos dir]
+      closestPosition = minimumBy (compare `on` distance targetPos) possiblePositions
+  in closestPosition
+
 validMove :: GameBoard -> Position -> Direction -> Bool
 validMove board position proposedDirection =
   let newPos = calculateNewPosition position proposedDirection
@@ -408,36 +439,7 @@ isPositionFree :: GameBoard -> Position -> Bool
 isPositionFree board position =
   isPositionInBounds position && not (any (intersects position) (walls board))
 
-bfs :: GameBoard -> Position -> Position -> [Direction]
-bfs board start target = bfsHelper board [(start, [])] target Set.empty
 
-bfsHelper :: GameBoard -> [(Position, [Direction])] -> Position -> Visited -> [Direction]
-bfsHelper board [] _ _ = [] -- Empty list means no path found.
-bfsHelper board ((currentPosition, path) : rest) target visited
-  | currentPosition == target = path
-  | otherwise =
-      let neighbors = filter (`Set.notMember` visited) $ adjacentPositions board currentPosition
-          newVisited = Set.insert currentPosition visited
-          updatedPaths = [(pos, path ++ [directionForMove currentPosition pos]) | pos <- neighbors]
-       in bfsHelper board (rest ++ updatedPaths) target newVisited
-
-adjacentPositions :: GameBoard -> Position -> [Position]
-adjacentPositions board pos =
-  [newPos | dir <- [Up, Down, Model.Left, Model.Right], isPositionFreeOfWalls board pos dir, let newPos = calculateNewPosition pos dir]
-
-directionForMove :: Position -> Position -> Direction
-directionForMove (x1, y1) (x2, y2)
-  | y2 > y1 = Up
-  | y2 < y1 = Down
-  | x2 > x1 = Model.Right
-  | x2 < x1 = Model.Left
-  | otherwise = error "Invalid move"
-
-getNextMoveBFS :: GameBoard -> Ghost -> Position -> Direction
-getNextMoveBFS board blinky target =
-  case bfs board (ghostPosition blinky) target of
-    [] -> ghostDirection blinky -- No path found, keep current direction.
-    (dir : _) -> dir
 
 moveEntity :: Movable a -> GameBoard -> a -> a
 moveEntity movable board entity =
