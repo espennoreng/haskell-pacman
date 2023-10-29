@@ -50,6 +50,7 @@ data Ghost = Ghost
   }
   deriving (Eq, Show)
 
+data GameScreen = StartScreen | GameScreen | GameOverScreen deriving (Eq, Show)
 -- Game state
 data GameState = GameState
   { pacman :: Pacman,
@@ -57,7 +58,8 @@ data GameState = GameState
     ghosts :: [Ghost],
     randGen :: StdGen,
     score :: Score,
-    lives :: Lives
+    lives :: Lives,
+    screen :: GameScreen
   }
   deriving (Eq, Show)
 
@@ -106,7 +108,6 @@ pacmanLoosesLife pacman ghosts lives =
     then
       if lives > 0
         then lives - 1
-
         else 0
     else lives
 
@@ -223,7 +224,8 @@ initGameState =
       ghosts = initGhosts,
       randGen = mkStdGen 0,
       score = 0,
-      lives = 3
+      lives = 3,
+      screen = StartScreen
     }
 
 isPositionInBounds :: (Ord a1, Ord a2, Fractional a1, Fractional a2) => (a1, a2) -> Bool
