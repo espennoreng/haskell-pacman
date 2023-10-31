@@ -1,4 +1,4 @@
-
+module Main where
 import qualified Graphics.Gloss.Interface.IO.Game as Game
 import Model (initGameState)
 import View (background, window)
