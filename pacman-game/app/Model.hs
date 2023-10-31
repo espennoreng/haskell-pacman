@@ -52,6 +52,7 @@ data Ghost = Ghost
 
 data GameScreen = StartScreen | GameScreen | GameOverScreen deriving (Eq, Show)
 -- Game state
+type Paused = Bool
 data GameState = GameState
   { pacman :: Pacman,
     food :: [Food],
@@ -59,7 +60,8 @@ data GameState = GameState
     randGen :: StdGen,
     score :: Score,
     lives :: Lives,
-    screen :: GameScreen
+    screen :: GameScreen,
+    paused :: Paused
   }
   deriving (Eq, Show)
 
@@ -225,7 +227,8 @@ initGameState =
       randGen = mkStdGen 0,
       score = 0,
       lives = 3,
-      screen = StartScreen
+      screen = StartScreen,
+      paused = False
     }
 
 isPositionInBounds :: (Ord a1, Ord a2, Fractional a1, Fractional a2) => (a1, a2) -> Bool

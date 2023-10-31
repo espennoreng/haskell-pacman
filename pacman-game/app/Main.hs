@@ -1,6 +1,5 @@
 import Graphics.Gloss (play)
 import Model (initGameState)
-import Test (runTests)
 import View (background, gameBoardToPicture, window)
 import Controller (handleInput, render, update)
 

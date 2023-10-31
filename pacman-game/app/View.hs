@@ -40,8 +40,17 @@ gameScoreToPicture score = translate (-100) 110 $ Color white $ Scale 0.1 0.1 $ 
 pacmanLivesToPicture :: Int -> Picture
 pacmanLivesToPicture lives = translate (-100) (-120) $ Color white $ Scale 0.1 0.1 $ Text $ "Lives: " ++ show lives
 
+pauseScreenPicture :: Picture
+pauseScreenPicture = translate 0 (-120) $ Color white $ Scale 0.1 0.1 $
+  Text "Press Space to resume"
+
+notPauseScreenPicture :: Picture
+notPauseScreenPicture = translate 0 (-120) $ Color white $ Scale 0.1 0.1 $
+  Text "Press Space to pause"
+
+
 gameBoardToPicture :: GameBoard -> GameState -> Picture
-gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts _ score lives _) =
+gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts _ score lives _ paused) =
   pictures $
     [wallToPicture wall | wall <- walls]
       ++ [foodToPicture food | food <- foods]
@@ -49,6 +58,7 @@ gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts _ score live
       ++ [ghostToPicture ghost | ghost <- ghosts]
       ++ [gameScoreToPicture score]
       ++ [pacmanLivesToPicture lives]
+      ++ [if paused then pauseScreenPicture else notPauseScreenPicture]
 
 -- Create Start Screen Picture
 startScreenPicture :: Picture
