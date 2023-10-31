@@ -61,18 +61,20 @@ gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts _ score live
       ++ [if paused then pauseScreenPicture else notPauseScreenPicture]
 
 -- Create Start Screen Picture
-startScreenPicture :: Picture
-startScreenPicture =
+startScreenPicture :: Int -> Picture
+startScreenPicture score =
   pictures
     [ Translate (-100) 0 $ Scale 0.2 0.2 $ Color white $ Text "Haskell Pacman",
-      Translate (-100) (-100) $ Scale 0.1 0.1 $ Color white $ Text "Press Enter to start"
+      Translate (-100) (-100) $ Scale 0.1 0.1 $ Color white $ Text "Press Enter to start",
+      Translate (-100) (-120) $ Scale 0.1 0.1 $ Color white $ Text ("High Score: " ++ show score)
     ]
 
 -- Create Game Over Screen Picture
-gameOverPicture :: Int -> Picture
-gameOverPicture score =
+gameOverPicture :: Int -> Int -> Picture
+gameOverPicture score highScore =
   pictures
     [ Translate (-100) 0 $ Scale 0.2 0.2 $ Color white $ Text "Game Over",
       Translate (-100) (-100) $ Scale 0.1 0.1 $ Color white $ Text $ "Score: " ++ show score,
-      Translate (-100) (-120) $ Scale 0.1 0.1 $ Color white $ Text "Press Enter to restart"
+      Translate (-100) (-120) $ Scale 0.1 0.1 $ Color white $ Text $ "High Score: " ++ show highScore,
+      Translate (-100) (-40) $ Scale 0.1 0.1 $ Color white $ Text "Press Enter to restart"
     ]

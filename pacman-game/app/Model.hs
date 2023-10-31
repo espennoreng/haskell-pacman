@@ -217,6 +217,24 @@ findGhost gType (ghost : rest) =
 ----------------------------------------
 -- Board functions
 ----------------------------------------
+restartGame :: GameState -> GameState
+restartGame gameState = gameState
+    { pacman = initPacman,
+      food = makeFoodOnEveryAvailablePosition pacmanGameBoard,
+      ghosts = initGhosts,
+      randGen = mkStdGen 0,
+      score = 0,
+      lives = 3,
+      screen = StartScreen,
+      paused = False
+    }
+
+resetPositionsAndLooseLife :: GameState -> GameState
+resetPositionsAndLooseLife gameState = gameState
+    { pacman = initPacman,
+      ghosts = initGhosts,
+      lives = lives gameState - 1
+    }
 
 initGameState :: GameState
 initGameState =
