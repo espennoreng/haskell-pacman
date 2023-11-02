@@ -14,10 +14,10 @@ import System.Random
 
 initGhosts :: [Ghost]
 initGhosts =
-  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10), releaseTimer = 0.0},
-    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10) , releaseTimer = 3.0},
-    Ghost {ghostType = Inky, ghostPosition = (0.0, 0.10) , releaseTimer = 6.0},
-    Ghost {ghostType = Clyde, ghostPosition = (0.0, 0.10) , releaseTimer = 9.0}
+  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10), releaseTimer = 0.0, ghostMode = Chase},
+    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10) , releaseTimer = 3.0, ghostMode = Chase},
+    Ghost {ghostType = Inky, ghostPosition = (0.0, 0.10) , releaseTimer = 6.0, ghostMode = Chase},
+    Ghost {ghostType = Clyde, ghostPosition = (0.0, 0.10) , releaseTimer = 9.0, ghostMode = Chase}
   ]
 
 placeGhostsInGhostHouse :: [Ghost] -> [Ghost]
@@ -25,10 +25,10 @@ placeGhostsInGhostHouse ghosts =
   [ghost {ghostPosition = (0.0, 0.10), releaseTimer = initialTimer (ghostType ghost)} | ghost <- ghosts]
   where
     initialTimer :: GhostType -> Float
-    initialTimer Blinky = 0      -- Blinky is released immediately
-    initialTimer Pinky = 3       -- Pinky is released after 5 seconds
-    initialTimer Inky = 6      -- Inky after 10 seconds
-    initialTimer Clyde = 9     -- Clyde after 15 seconds
+    initialTimer Blinky = 0       -- Blinky is released immediately
+    initialTimer Pinky = 3        -- Pinky is released after 5 seconds
+    initialTimer Inky = 6         -- Inky after 10 seconds
+    initialTimer Clyde = 9        -- Clyde after 15 seconds
 
 getBlinkyTarget :: Pacman -> Position
 getBlinkyTarget = position
@@ -116,18 +116,19 @@ updateGhostTimer deltaTime ghost =
 moveGhostToExitPosition :: GameBoard -> Ghost -> Position -> Ghost
 moveGhostToExitPosition board ghost exitPosition =
   if isPositionFreeOfWallsGhostEdition board (ghostPosition ghost) exitPosition
-    then ghost {ghostPosition = exitPosition, ghostMode = Chase} -- Update mode if needed
+    then ghost {ghostPosition = exitPosition, ghostMode = Chase}
     else ghost
 
--- We assume isPositionFreeOfWalls checks if a given position is not blocked by a wall.
--- It could look something like this (but you'll need to use your existing function or write one):
+
 isPositionFreeOfWallsGhostEdition :: GameBoard -> Position -> Position -> Bool
 isPositionFreeOfWallsGhostEdition (GameBoard walls) currentPos proposedPos =
-  not $ any (\wall -> case wall of
-                         NormalWall pos -> pos == proposedPos
-                         GhostHomeWall pos -> pos == proposedPos) walls
+  not $ any matchesPosition walls
+  where
+    matchesPosition :: Wall -> Bool
+    matchesPosition (NormalWall pos) = pos == proposedPos
+    matchesPosition (GhostHomeWall pos) = pos == proposedPos
 
--- Adjust the 'moveGhostOutOfGhostHouse' to pass the 'GameBoard' argument along:
+
 moveGhostOutOfGhostHouse :: GameBoard -> Ghost -> Ghost
 moveGhostOutOfGhostHouse board ghost =
   case ghostType ghost of
@@ -136,11 +137,9 @@ moveGhostOutOfGhostHouse board ghost =
     Inky -> moveGhostToExitPosition board ghost (0.0, 0.20)
     Clyde -> moveGhostToExitPosition board ghost (0.0, 0.20)
 
--- Keep the isInsideGhostHouse function as it was:
 isInsideGhostHouse :: Position -> Bool
 isInsideGhostHouse (x, y) = x >= -0.10 && x <= 0.10 && y >= 0.05 && y <= 0.15
 
--- Now, let's update the 'releaseGhostIfNeeded' to use the 'isInsideGhostHouse' check:
 releaseGhostIfNeeded :: GameBoard -> Ghost -> Ghost
 releaseGhostIfNeeded board ghost =
   if releaseTimer ghost <= 0 && isInsideGhostHouse (ghostPosition ghost)

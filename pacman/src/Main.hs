@@ -10,4 +10,4 @@ import Controller.Update (handleUpdate)
 main :: IO ()
 main = do 
     let initialState = initGameState
-    Game.playIO window background 5 initialState handleRender handleInput handleUpdate
+    Game.playIO window background 4 initialState handleRender handleInput handleUpdate
