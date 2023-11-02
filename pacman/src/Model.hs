@@ -45,7 +45,8 @@ data GhostMode = Chase | Scatter | Frightened deriving (Eq, Show)
 data Ghost = Ghost
   { ghostType :: GhostType,
     ghostPosition :: Position,
-    ghostMode :: GhostMode
+    ghostMode :: GhostMode,
+    releaseTimer :: Float
   }
   deriving (Eq, Show)
 
@@ -123,15 +124,21 @@ resetPacmanAndGhosts gameState =
 ----------------------------------------
 initGhosts :: [Ghost]
 initGhosts =
-  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10)},
-    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10)},
-    Ghost {ghostType = Inky, ghostPosition = (0.0, 0.10)},
-    Ghost {ghostType = Clyde, ghostPosition = (0.0, 0.10)}
+  [ Ghost {ghostType = Blinky, ghostPosition = (0.0, 0.10), releaseTimer = 0.0},
+    Ghost {ghostType = Pinky, ghostPosition = (0.0, 0.10) , releaseTimer = 3.0},
+    Ghost {ghostType = Inky, ghostPosition = (0.0, 0.10) , releaseTimer = 6.0},
+    Ghost {ghostType = Clyde, ghostPosition = (0.0, 0.10) , releaseTimer = 9.0}
   ]
 
 placeGhostsInGhostHouse :: [Ghost] -> [Ghost]
 placeGhostsInGhostHouse ghosts =
-  [ghost {ghostPosition = (0.0, 0.10)} | ghost <- ghosts]
+  [ghost {ghostPosition = (0.0, 0.10), releaseTimer = initialTimer (ghostType ghost)} | ghost <- ghosts]
+  where
+    initialTimer :: GhostType -> Float
+    initialTimer Blinky = 0      -- Blinky is released immediately
+    initialTimer Pinky = 3       -- Pinky is released after 5 seconds
+    initialTimer Inky = 6      -- Inky after 10 seconds
+    initialTimer Clyde = 9     -- Clyde after 15 seconds
 
 getBlinkyTarget :: Pacman -> Position
 getBlinkyTarget = position
@@ -210,6 +217,45 @@ findGhost gType (ghost : rest) =
     then ghost
     else findGhost gType rest
 
+updateGhostTimer :: Float -> Ghost -> Ghost
+updateGhostTimer deltaTime ghost =
+  if releaseTimer ghost > 0
+    then ghost {releaseTimer = releaseTimer ghost - deltaTime}
+    else ghost
+
+moveGhostToExitPosition :: GameBoard -> Ghost -> Position -> Ghost
+moveGhostToExitPosition board ghost exitPosition =
+  if isPositionFreeOfWallsGhostEdition board (ghostPosition ghost) exitPosition
+    then ghost {ghostPosition = exitPosition, ghostMode = Chase} -- Update mode if needed
+    else ghost
+
+-- We assume isPositionFreeOfWalls checks if a given position is not blocked by a wall.
+-- It could look something like this (but you'll need to use your existing function or write one):
+isPositionFreeOfWallsGhostEdition :: GameBoard -> Position -> Position -> Bool
+isPositionFreeOfWallsGhostEdition (GameBoard walls) currentPos proposedPos =
+  not $ any (\wall -> case wall of
+                         NormalWall pos -> pos == proposedPos
+                         GhostHomeWall pos -> pos == proposedPos) walls
+
+-- Adjust the 'moveGhostOutOfGhostHouse' to pass the 'GameBoard' argument along:
+moveGhostOutOfGhostHouse :: GameBoard -> Ghost -> Ghost
+moveGhostOutOfGhostHouse board ghost =
+  case ghostType ghost of
+    Blinky -> moveGhostToExitPosition board ghost (0.0, 0.20)
+    Pinky -> moveGhostToExitPosition board ghost (0.0, 0.20)
+    Inky -> moveGhostToExitPosition board ghost (0.0, 0.20)
+    Clyde -> moveGhostToExitPosition board ghost (0.0, 0.20)
+
+-- Keep the isInsideGhostHouse function as it was:
+isInsideGhostHouse :: Position -> Bool
+isInsideGhostHouse (x, y) = x >= -0.10 && x <= 0.10 && y >= 0.05 && y <= 0.15
+
+-- Now, let's update the 'releaseGhostIfNeeded' to use the 'isInsideGhostHouse' check:
+releaseGhostIfNeeded :: GameBoard -> Ghost -> Ghost
+releaseGhostIfNeeded board ghost =
+  if releaseTimer ghost <= 0 && isInsideGhostHouse (ghostPosition ghost)
+    then moveGhostOutOfGhostHouse board ghost
+    else ghost
 ----------------------------------------
 -- Board functions
 ----------------------------------------

@@ -53,29 +53,27 @@ render gameState =
         gameOverPicture (score gameState) <$> getHighestScore
     _ -> return $ gameBoardToPicture pacmanGameBoard gameState
 
-
 update :: Float -> GameState -> IO GameState
-update _ gameState@(GameState pacman food ghosts gen score lives screen paused) =
-  if paused then
+update deltaTime gameState@(GameState pacman food ghosts gen score lives screen paused) =
+  if paused || screen /= GameScreen then
     return gameState
-  else
-    case screen of
-      GameScreen -> do
-        let updatedPacman = movePacman pacmanGameBoard pacman
-            (updatedGhosts, newGen) = moveGhosts gen pacmanGameBoard pacman ghosts
-            (foodEaten, newFood) = pacmanEatsFood updatedPacman food
-            scoreIncrement = if foodEaten then 1 else 0
-            newScore = score + scoreIncrement
-            newLives = pacmanLoosesLife updatedPacman ghosts lives
-            newGameScreen = if newLives == 0 then GameOverScreen else GameScreen
+  else do
+    let updatedPacman = movePacman pacmanGameBoard pacman
+        updatedGhosts = map (updateGhostTimer deltaTime) ghosts
+        releasedGhosts = map (releaseGhostIfNeeded pacmanGameBoard) updatedGhosts
+        (movedGhosts, newGen) = moveGhosts gen pacmanGameBoard updatedPacman releasedGhosts
+        (foodEaten, newFood) = pacmanEatsFood updatedPacman food
+        scoreIncrement = if foodEaten then 1 else 0
+        newScore = score + scoreIncrement
+        newLives = pacmanLoosesLife updatedPacman movedGhosts lives
+        newGameScreen = if newLives == 0 then GameOverScreen else GameScreen
 
-        if newLives == 0 then
-          do  writeHighScore newScore
-              return $ restartGame gameState      
-        else if newLives < lives then  -- Indicates Pacman lost a life
-          return $ resetPositionsAndLooseLife gameState { score = newScore, food = newFood, screen = newGameScreen, randGen = newGen }
-        else
-          return $ gameState { pacman = updatedPacman, ghosts = updatedGhosts, food = newFood, score = newScore, screen = newGameScreen, randGen = newGen }
-      GameOverScreen -> return $ restartGame gameState
-
-      _ -> return gameState
+    -- Handling score and high score
+    if newLives == 0 then
+      do writeHighScore newScore
+         return $ restartGame gameState { score = newScore }
+    else if newLives < lives then -- Indicates Pacman lost a life
+      return $ resetPositionsAndLooseLife gameState { score = newScore, food = newFood, screen = newGameScreen, randGen = newGen, lives = newLives }
+    else
+      return $ gameState { pacman = updatedPacman, ghosts = movedGhosts, food = newFood, score = newScore, screen = newGameScreen, randGen = newGen }
+   
