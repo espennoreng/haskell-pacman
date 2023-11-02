@@ -374,38 +374,6 @@ validGameBoard =
           ++ [(x, -0.1) | x <- [0.1, 0.2, 0.3]]
     }
 
-invalidGameBoard :: GameBoard
-invalidGameBoard =
-  GameBoard
-    { walls =
-        -- Left side
-        [(-0.5, y) | y <- [-0.5, -0.4 .. 0.5]]
-          -- Top side
-          ++ [(x, 0.5) | x <- [-0.5, -0.4 .. 0.5]]
-          -- Right side
-          ++ [(0.5, y) | y <- [-0.5, -0.4 .. 0.5]]
-          -- Bottom side
-          ++ [(x, -0.5) | x <- [-0.5, -0.4 .. 0.5]]
-    }
-
--- A board with walls on each side and a line in the middle.
-testBoard :: GameBoard
-testBoard =
-  GameBoard
-    { walls =
-        -- Left side
-        [(-0.5, y) | y <- [-0.5, -0.45 .. 0.5]]
-          -- Top side
-          ++ [(x, 0.5) | x <- [-0.5, -0.45 .. 0.5]]
-          -- Right side
-          ++ [(0.5, y) | y <- [-0.5, -0.45 .. 0.5]]
-          -- Bottom side
-          ++ [(x, -0.5) | x <- [-0.5, -0.45 .. 0.5]]
-          -- Some internal vertical walls
-          ++ [(-0.3, y) | y <- [0.0, 0.1, 0.2]]
-          ++ [(0.3, y) | y <- [-0.2, -0.1, 0.0]]
-    }
-
 ----------------------------------------
 -- Helper functions
 ----------------------------------------
