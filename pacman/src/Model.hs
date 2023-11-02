@@ -4,14 +4,14 @@ import Data.Foldable (minimumBy)
 import Data.Function (on)
 import Data.List (find)
 import System.Random
+import Model.Pacman.Types
+import Model.Ghosts.Types
+import Model.Utils.Types as UtilsTypes
 
 ----------------------------------------
 -- Data types
 ----------------------------------------
 -- Board
-type Position = (Float, Float)
-
-type Vector = (Float, Float)
 
 type Score = Int
 
@@ -27,28 +27,7 @@ newtype GameBoard = GameBoard
   {walls :: [Wall]}
   deriving (Eq, Show)
 
--- Pacman
-data Direction = Up | Down | Left | Right deriving (Eq, Show)
 
-data Pacman = Pacman
-  { position :: Position, -- The position of the pacman.
-    direction :: Direction, -- The direction of the pacman.
-    lastSuccessfulDirection :: Direction
-  }
-  deriving (Eq, Show)
-
--- Ghost
-data GhostType = Blinky | Pinky | Inky | Clyde deriving (Eq, Show)
-
-data GhostMode = Chase | Scatter | Frightened deriving (Eq, Show)
-
-data Ghost = Ghost
-  { ghostType :: GhostType,
-    ghostPosition :: Position,
-    ghostMode :: GhostMode,
-    releaseTimer :: Float
-  }
-  deriving (Eq, Show)
 
 data GameScreen = StartScreen | GameScreen | GameOverScreen deriving (Eq, Show)
 
@@ -80,7 +59,7 @@ data Movable a = Movable
 -- Pacman functions
 ----------------------------------------
 initPacman :: Pacman -- Initialize the pacman in the center facing right.
-initPacman = Pacman {position = (-0.45, -0.45), direction = Model.Down, lastSuccessfulDirection = Model.Down}
+initPacman = Pacman {position = (-0.45, -0.45), direction = UtilsTypes.Down, lastSuccessfulDirection = UtilsTypes.Down}
 
 movePacman :: GameBoard -> Pacman -> Pacman
 movePacman = moveEntity pacmanMovable
@@ -193,8 +172,8 @@ moveClydeRandomly gen board clyde =
       newDirection = case n of
         1 -> Up
         2 -> Down
-        3 -> Model.Left
-        4 -> Model.Right
+        3 -> UtilsTypes.Left
+        4 -> UtilsTypes.Right
         _ -> error "Invalid random number"
       proposedPosition = calculateNewPosition (ghostPosition clyde) newDirection
    in if isPositionFreeOfWalls board (ghostPosition clyde) newDirection
@@ -427,7 +406,7 @@ distance (x1, y1) (x2, y2) =
 -- Calculate the next position for a ghost using a greedy algorithm
 greedyMove :: GameBoard -> Position -> Position -> Position
 greedyMove board currentPos targetPos =
-  let possibleDirections = [Up, Down, Model.Left, Model.Right]
+  let possibleDirections = [Up, Down, UtilsTypes.Left, UtilsTypes.Right]
       possiblePositions =
         [calculateNewPosition currentPos dir | dir <- possibleDirections, isPositionFreeOfWalls board currentPos dir]
       closestPosition = minimumBy (compare `on` distance targetPos) possiblePositions
@@ -446,9 +425,9 @@ calculateNewPosition :: Position -> Direction -> Position
 calculateNewPosition (x, y) proposedDirection =
   case proposedDirection of
     Up -> (x, y + 0.05)
-    Model.Down -> (x, y - 0.05)
-    Model.Left -> (x - 0.05, y)
-    Model.Right -> (x + 0.05, y)
+    UtilsTypes.Down -> (x, y - 0.05)
+    UtilsTypes.Left -> (x - 0.05, y)
+    UtilsTypes.Right -> (x + 0.05, y)
 
 intersects :: Position -> Position -> Bool
 intersects (x1, y1) (x2, y2) =

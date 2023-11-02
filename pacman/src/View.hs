@@ -2,6 +2,9 @@ module View where
 import Graphics.Gloss (Color, Display (InWindow), Picture (Scale, Text, Pictures, Color, Translate), red, white, translate, pictures, orange, cyan, rose, circleSolid, yellow, rectangleSolid, blue, black)
 import Model
 import Graphics.Gloss.Data.Color (white)
+import Model.Pacman.Types
+import Model.Utils.Types
+import Model.Ghosts.Types
 
 window :: Display
 window = InWindow "Haskell Pacman" (400, 300) (10, 10)

@@ -4,6 +4,9 @@ import Graphics.Gloss.Interface.Pure.Game
 import qualified Graphics.Gloss.Interface.IO.Game as Game
 import Model
 import View
+import Model.Utils.Types as UtilsTypes
+import Model.Pacman.Types
+
 
 readHighScores :: IO [Int]
 readHighScores = do
@@ -27,10 +30,10 @@ handleInput event gameState@(GameState pacman food ghosts gen score lives screen
         case screen of
             GameScreen ->
                 case event of
-                    (EventKey (SpecialKey KeyUp) _ _ _) -> gameState {pacman = pacman {direction = Model.Up}}
-                    (EventKey (SpecialKey KeyDown) _ _ _) -> gameState {pacman = pacman {direction = Model.Down}}
-                    (EventKey (SpecialKey KeyLeft) _ _ _) -> gameState {pacman = pacman {direction = Model.Left}}
-                    (EventKey (SpecialKey KeyRight) _ _ _) -> gameState {pacman = pacman {direction = Model.Right}}
+                    (EventKey (SpecialKey KeyUp) _ _ _) -> gameState {pacman = pacman {direction = UtilsTypes.Up}}
+                    (EventKey (SpecialKey KeyDown) _ _ _) -> gameState {pacman = pacman {direction = UtilsTypes.Down}}
+                    (EventKey (SpecialKey KeyLeft) _ _ _) -> gameState {pacman = pacman {direction = UtilsTypes.Left}}
+                    (EventKey (SpecialKey KeyRight) _ _ _) -> gameState {pacman = pacman {direction = UtilsTypes.Right}}
                     (EventKey (SpecialKey KeySpace) Game.Down _ _) -> gameState {paused = not paused}
                     _ -> gameState
             StartScreen ->
