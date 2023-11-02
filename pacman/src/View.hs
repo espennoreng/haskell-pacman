@@ -1,5 +1,4 @@
-module View where
-
+module View where 
 import Graphics.Gloss (Color, Display (InWindow), Picture (Scale, Text, Pictures, Color, Translate), red, white, translate, pictures, orange, cyan, rose, circleSolid, yellow, rectangleSolid, blue, black)
 import Model
 import Graphics.Gloss.Data.Color (white)
@@ -15,10 +14,14 @@ translatePosition :: (Float, Float) -> Picture -> Picture
 translatePosition (x, y) = Translate (x * 200) (y * 200)
 
 wallToPicture :: Wall -> Picture
-wallToPicture wall = translatePosition wall $ Pictures [border, wallPic]
+wallToPicture wall = translatePosition (wallPosition wall) $ Pictures [border, wallPic]
   where
-    border = Color white $ rectangleSolid 8 8
-    wallPic = Color blue $ rectangleSolid 7 7
+    border = case wall of
+      GhostHomeWall _ -> Color white $ rectangleSolid 4 4
+      NormalWall _ -> Color white $ rectangleSolid 9 9
+    wallPic = case wall of
+      GhostHomeWall _ -> Color blue $ rectangleSolid 2 2
+      NormalWall _ -> Color blue $ rectangleSolid 8 8
 
 foodToPicture :: Food -> Picture
 foodToPicture food = translatePosition food $ Color cyan $ circleSolid 2

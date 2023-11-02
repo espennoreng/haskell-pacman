@@ -1,9 +1,9 @@
 module Model where
 
 import Data.Foldable (minimumBy)
+import Data.Function (on)
 import Data.List (find)
 import System.Random
-import Data.Function (on)
 
 ----------------------------------------
 -- Data types
@@ -17,13 +17,14 @@ type Score = Int
 
 type Lives = Int
 
-type Wall = Position
+data Wall = NormalWall Position | GhostHomeWall Position deriving (Eq, Show)
+
+type GhostHouseWalls = Position
 
 type Food = Position
 
 newtype GameBoard = GameBoard
-  { walls :: [Wall]
-  }
+  {walls :: [Wall]}
   deriving (Eq, Show)
 
 -- Pacman
@@ -49,8 +50,10 @@ data Ghost = Ghost
   deriving (Eq, Show)
 
 data GameScreen = StartScreen | GameScreen | GameOverScreen deriving (Eq, Show)
+
 -- Game state
 type Paused = Bool
+
 data GameState = GameState
   { pacman :: Pacman,
     food :: [Food],
@@ -109,7 +112,8 @@ pacmanLoosesLife pacman ghosts lives =
     else lives
 
 resetPacmanAndGhosts :: GameState -> GameState
-resetPacmanAndGhosts gameState = gameState
+resetPacmanAndGhosts gameState =
+  gameState
     { pacman = initPacman,
       ghosts = initGhosts
     }
@@ -146,31 +150,30 @@ moveBlinky :: GameBoard -> Pacman -> Ghost -> Ghost
 moveBlinky board pacman blinky =
   let target = getBlinkyTarget pacman
       newPos = greedyMove board (ghostPosition blinky) target
-  in blinky { ghostPosition = newPos }
+   in blinky {ghostPosition = newPos}
 
 movePinky :: GameBoard -> Pacman -> Ghost -> Ghost
 movePinky board pacman pinky =
   let target = getPinkyTarget pacman
       newPos = greedyMove board (ghostPosition pinky) target
-  in pinky { ghostPosition = newPos }
+   in pinky {ghostPosition = newPos}
 
 moveInky :: GameBoard -> Pacman -> Ghost -> [Ghost] -> Ghost
 moveInky board pacman inky allGhosts =
   let blinkyPos = ghostPosition $ findGhost Blinky allGhosts
       target = getInkyTarget pacman blinkyPos
       newPos = greedyMove board (ghostPosition inky) target
-  in inky { ghostPosition = newPos }
+   in inky {ghostPosition = newPos}
 
--- Modify moveClyde function to use greedy algorithm when not in random mode
 moveClyde :: StdGen -> GameBoard -> Pacman -> Ghost -> (Ghost, StdGen)
 moveClyde gen board pacman clyde =
   let (shouldMoveRandomly, newGen) = shouldChase gen
-  in if shouldMoveRandomly
-       then moveClydeRandomly gen board clyde
-       else
-         let target = position pacman
-             newPos = greedyMove board (ghostPosition clyde) target
-         in (clyde { ghostPosition = newPos }, newGen)
+   in if shouldMoveRandomly
+        then moveClydeRandomly gen board clyde
+        else
+          let target = position pacman
+              newPos = greedyMove board (ghostPosition clyde) target
+           in (clyde {ghostPosition = newPos}, newGen)
 
 shouldChase :: StdGen -> (Bool, StdGen)
 shouldChase gen =
@@ -187,10 +190,9 @@ moveClydeRandomly gen board clyde =
         4 -> Model.Right
         _ -> error "Invalid random number"
       proposedPosition = calculateNewPosition (ghostPosition clyde) newDirection
-    in if isPositionFreeOfWalls board (ghostPosition clyde) newDirection
-          then (clyde {ghostPosition = proposedPosition}, newGen)
-          else (clyde, newGen)
-
+   in if isPositionFreeOfWalls board (ghostPosition clyde) newDirection
+        then (clyde {ghostPosition = proposedPosition}, newGen)
+        else (clyde, newGen)
 
 moveGhosts :: StdGen -> GameBoard -> Pacman -> [Ghost] -> ([Ghost], StdGen)
 moveGhosts gen board pacman ghosts =
@@ -200,7 +202,6 @@ moveGhosts gen board pacman ghosts =
       clyde = findGhost Clyde ghosts
       (newClyde, newGen) = moveClyde gen board pacman clyde
    in ([moveBlinky board pacman blinky, movePinky board pacman pinky, moveInky board pacman inky ghosts, newClyde], newGen)
-
 
 findGhost :: GhostType -> [Ghost] -> Ghost
 findGhost _ [] = error "No ghosts found"
@@ -212,8 +213,14 @@ findGhost gType (ghost : rest) =
 ----------------------------------------
 -- Board functions
 ----------------------------------------
+
+wallPosition :: Wall -> Position
+wallPosition (GhostHomeWall pos) = pos
+wallPosition (NormalWall pos) = pos
+
 restartGame :: GameState -> GameState
-restartGame gameState = gameState
+restartGame gameState =
+  gameState
     { pacman = initPacman,
       food = makeFoodOnEveryAvailablePosition pacmanGameBoard,
       ghosts = initGhosts,
@@ -225,7 +232,8 @@ restartGame gameState = gameState
     }
 
 resetPositionsAndLooseLife :: GameState -> GameState
-resetPositionsAndLooseLife gameState = gameState
+resetPositionsAndLooseLife gameState =
+  gameState
     { pacman = initPacman,
       ghosts = initGhosts,
       lives = lives gameState - 1
@@ -252,32 +260,37 @@ makeFoodOnEveryAvailablePosition board =
   let allPositions = [(x, y) | x <- [-0.45, -0.40 .. 0.45], y <- [-0.45, -0.40 .. 0.45]]
    in filter (isPositionFree board) allPositions
 
-pacmanGameBoard :: GameBoard
-pacmanGameBoard =
-  GameBoard
-    { walls =
-        outerWalls
-          ++ leftBottomL
-          ++ rightBottomL
-          ++ bottomU
-          ++ leftBottomZ
-          ++ rightBottomZ
-          ++ bottomT
-          ++ leftMiddleU
-          ++ rightMiddleU
-          ++ leftLineMiddle
-          ++ rightLineMiddle
-          ++ ghostHouseWalls
-          ++ middleLeftRectangle
-          ++ middleRightRectangle
-          ++ topLeftL
-          ++ topRightL
-          ++ middleRectangleTopLeft
-          ++ middleRectangleTopRight
-          ++ topT
-          ++ topZLeft
-          ++ topZRight
-    }
+ghostHomeWalls :: [Wall]
+ghostHomeWalls =
+  [GhostHomeWall (x, 0.05) | x <- [-0.10, -0.05 .. 0.10]] -- Horizontal part of ghost house
+    ++ [GhostHomeWall (0.10, y) | y <- [0.05, 0.10, 0.15]] -- Vertical left part of ghost house
+    ++ [GhostHomeWall (-0.10, y) | y <- [0.05, 0.10, 0.15]] -- Vertical right part of ghost house
+    ++ [GhostHomeWall (x, 0.15) | x <- [-0.10, -0.05 .. 0.10]] -- Horizontal top part of ghost house
+
+normalWalls :: [Wall]
+normalWalls =
+  map NormalWall $ concat
+    [ outerWalls
+    , leftBottomL
+    , rightBottomL
+    , bottomU
+    , leftBottomZ
+    , rightBottomZ
+    , bottomT
+    , leftMiddleU
+    , rightMiddleU
+    , leftLineMiddle
+    , rightLineMiddle
+    , middleLeftRectangle
+    , middleRightRectangle
+    , topLeftL
+    , topRightL
+    , middleRectangleTopLeft
+    , middleRectangleTopRight
+    , topT
+    , topZLeft
+    , topZRight
+    ]
   where
     outerWalls =
       [(-0.5, y) | y <- [-0.5, -0.45 .. 0.5]] -- Left side
@@ -320,10 +333,6 @@ pacmanGameBoard =
       [(-0.20, y) | y <- [-0.05, 0.0 .. 0.15]] -- Vertical left part of line
     rightLineMiddle =
       [(0.20, y) | y <- [-0.05, 0.0 .. 0.15]] -- Vertical right part of line
-    ghostHouseWalls =
-      [(x, 0.05) | x <- [-0.10, -0.05 .. 0.10]] -- Horizontal part of ghost house
-        ++ [(0.10, y) | y <- [0.05, 0.10, 0.15]] -- Vertical left part of ghost house
-        ++ [(-0.10, y) | y <- [0.05, 0.10, 0.15]] -- Vertical right part of ghost house
     middleLeftRectangle =
       [(x, 0.15) | x <- [-0.30, -0.35, -0.40]] -- Horizontal top part of U
         ++ [(x, 0.10) | x <- [-0.30, -0.35, -0.40]] -- Horizontal top part of U
@@ -354,24 +363,10 @@ pacmanGameBoard =
         ++ [(x, 0.45) | x <- [0.20]] -- Horizontal top part
         ++ [(x, 0.35) | x <- [0.10]] -- Horizontal bottom part
 
-validGameBoard :: GameBoard
-validGameBoard =
+pacmanGameBoard :: GameBoard
+pacmanGameBoard =
   GameBoard
-    { walls =
-        -- Left side
-        [(-0.5, y) | y <- [-0.5, -0.4 .. 0.5]]
-          -- Top side
-          ++ [(x, 0.5) | x <- [-0.5, -0.4 .. 0.5]]
-          -- Right side
-          ++ [(0.5, y) | y <- [-0.5, -0.4 .. 0.5]]
-          -- Bottom side
-          ++ [(x, -0.5) | x <- [-0.5, -0.4 .. 0.5]]
-          -- Some internal vertical walls
-          ++ [(-0.3, y) | y <- [0.0, 0.1, 0.2]]
-          ++ [(0.3, y) | y <- [-0.2, -0.1, 0.0]]
-          -- Some internal horizontal walls
-          ++ [(x, 0.3) | x <- [-0.2, -0.1, 0.0]]
-          ++ [(x, -0.1) | x <- [0.1, 0.2, 0.3]]
+    { walls = ghostHomeWalls ++ normalWalls
     }
 
 ----------------------------------------
@@ -390,7 +385,7 @@ greedyMove board currentPos targetPos =
       possiblePositions =
         [calculateNewPosition currentPos dir | dir <- possibleDirections, isPositionFreeOfWalls board currentPos dir]
       closestPosition = minimumBy (compare `on` distance targetPos) possiblePositions
-  in closestPosition
+   in closestPosition
 
 validMove :: GameBoard -> Position -> Direction -> Bool
 validMove board position proposedDirection =
@@ -419,13 +414,11 @@ intersects (x1, y1) (x2, y2) =
 isPositionFreeOfWalls :: GameBoard -> Position -> Direction -> Bool
 isPositionFreeOfWalls (GameBoard walls) position direction =
   let proposedPosition = calculateNewPosition position direction
-   in not (any (intersects proposedPosition) walls)
+   in not (any (intersects proposedPosition . wallPosition) walls)
 
 isPositionFree :: GameBoard -> Position -> Bool
-isPositionFree board position =
-  isPositionInBounds position && not (any (intersects position) (walls board))
-
-
+isPositionFree (GameBoard walls) position =
+  isPositionInBounds position && not (any (intersects position . wallPosition) walls)
 
 moveEntity :: Movable a -> GameBoard -> a -> a
 moveEntity movable board entity =
