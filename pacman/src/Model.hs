@@ -6,6 +6,7 @@ import Data.List (find)
 import System.Random
 import Model.Pacman.Types
 import Model.Ghosts.Types
+import Model.Board.Types
 import Model.Utils.Types as UtilsTypes
 
 ----------------------------------------
@@ -17,17 +18,7 @@ type Score = Int
 
 type Lives = Int
 
-data Wall = NormalWall Position | GhostHomeWall Position deriving (Eq, Show)
-
-type GhostHouseWalls = Position
-
 type Food = Position
-
-newtype GameBoard = GameBoard
-  {walls :: [Wall]}
-  deriving (Eq, Show)
-
-
 
 data GameScreen = StartScreen | GameScreen | GameOverScreen deriving (Eq, Show)
 

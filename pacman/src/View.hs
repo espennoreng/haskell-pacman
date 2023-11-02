@@ -5,6 +5,7 @@ import Graphics.Gloss.Data.Color (white)
 import Model.Pacman.Types
 import Model.Utils.Types
 import Model.Ghosts.Types
+import Model.Board.Types
 
 window :: Display
 window = InWindow "Haskell Pacman" (400, 300) (10, 10)
