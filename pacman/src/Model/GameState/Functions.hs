@@ -56,6 +56,8 @@ initGameState =
       paused = False
     }
 
+
+
 makeFoodOnEveryAvailablePosition :: GameBoard -> [Food]
 makeFoodOnEveryAvailablePosition board =
   let allPositions = [(x, y) | x <- [-0.45, -0.40 .. 0.45], y <- [-0.45, -0.40 .. 0.45]]

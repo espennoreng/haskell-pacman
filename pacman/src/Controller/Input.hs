@@ -35,6 +35,10 @@ handleMovement key gameState@(GameState {pacman = pacman}) =
         (Char 's')            -> UtilsTypes.Down
         (Char 'a')            -> UtilsTypes.Left
         (Char 'd')            -> UtilsTypes.Right
+        (Char 'W')            -> UtilsTypes.Up
+        (Char 'S')            -> UtilsTypes.Down
+        (Char 'A')            -> UtilsTypes.Left
+        (Char 'D')            -> UtilsTypes.Right
         _ -> direction pacman
    in gameState {pacman = pacman {direction = newDirection}}
 

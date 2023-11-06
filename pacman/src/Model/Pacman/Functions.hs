@@ -14,7 +14,7 @@ import Data.List (find)
 initPacman :: Pacman
 initPacman =
   Pacman
-    { position = (-0.45, -0.45),
+    { position = (0, -0.45),
       direction = UtilsTypes.Right,
       lastSuccessfulDirection = UtilsTypes.Right
     }
