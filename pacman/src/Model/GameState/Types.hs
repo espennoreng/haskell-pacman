@@ -10,6 +10,8 @@ type Lives = Int
 
 type Food = Position
 
+type PowerPill = Position
+
 type Paused = Bool
 
 data GameScreen = StartScreen | GameScreen | GameOverScreen deriving (Eq, Show)
