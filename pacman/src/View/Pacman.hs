@@ -4,18 +4,26 @@ import Graphics.Gloss
 import Model.Pacman.Types
 import Model.Utils.Functions
 
+import Model.Utils.Types as UtilsTypes
+import qualified Model.Pacman.Types as Model.Utils.Functions
+
+directionToAngle :: UtilsTypes.Direction -> Float
+directionToAngle UtilsTypes.Up    = 270     -- 90 degrees for upward
+directionToAngle UtilsTypes.Down  = 90    -- 270 degrees for downward
+directionToAngle UtilsTypes.Left  = 180    -- 180 degrees for left
+directionToAngle UtilsTypes.Right = 0      -- 0 degrees for right
+
+-- | Convert Pacman's state to a Picture with a wedge to represent an open mouth
 pacmanToPicture :: Pacman -> Picture
 pacmanToPicture pacman =
-  translatePosition (position pacman) $
-    Color yellow $
-      -- arcSolid takes start and end angles in degrees, 0 degrees is along the x axis and positive is counter clockwise.
-      -- Adjust the angles to create a mouth for Pacman
-      arcSolid startAngle endAngle pacmanRadius
+  translatePosition (Model.Utils.Functions.position pacman) $
+    rotate (directionToAngle $ Model.Pacman.Types.direction pacman) $
+      Color yellow $
+        arcSolid (startAngle - mouthSize / 2) (startAngle + mouthSize / 2) pacmanRadius
   where
-    pacmanRadius = 5 -- Define the radius of Pacman
-    mouthSize = 60     -- Define the size of the mouth opening in degrees
-    startAngle = -mouthSize / 2 -- Start angle for the arc
-    endAngle = mouthSize / 2    -- End angle for the arc
+    pacmanRadius = 5      -- Define the radius of Pacman
+    mouthSize = 60         -- Define the size of the mouth opening in degrees
+    startAngle = 0         -- 0 degrees is to the right, the default facing direction
 
 pacmanIconSize :: Float
 pacmanIconSize = 4 -- Size of the pacman icon for lives
