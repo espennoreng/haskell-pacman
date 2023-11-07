@@ -7,23 +7,35 @@ import Model.Utils.Functions
 import Model.Utils.Types as UtilsTypes
 import qualified Model.Pacman.Types as Model.Utils.Functions
 
+import Graphics.Gloss
+import Model.Pacman.Types
+import Model.Utils.Functions (translatePosition)
+import Graphics.Gloss.Juicy (loadJuicyPNG)
+import System.IO.Unsafe (unsafePerformIO)
+import Control.Exception (handle, SomeException)
+
+-- | Load a PNG image and handle any exceptions by returning a blank image.
+loadPacmanPNG :: FilePath -> Picture
+loadPacmanPNG path = unsafePerformIO (handle (\e -> do
+    let _ = e :: SomeException
+    return Blank) (loadJuicyPNG path >>= maybe (return Blank) return))
+
+-- | Image for Pac-Man.
+pacmanImage :: Picture
+pacmanImage = loadPacmanPNG "res/pacman.png"
+
 directionToAngle :: UtilsTypes.Direction -> Float
-directionToAngle UtilsTypes.Up    = 270     -- 90 degrees for upward
-directionToAngle UtilsTypes.Down  = 90    -- 270 degrees for downward
+directionToAngle UtilsTypes.Up    = 270    -- 270 degrees for upward
+directionToAngle UtilsTypes.Down  = 90     -- 90 degrees for downward
 directionToAngle UtilsTypes.Left  = 180    -- 180 degrees for left
 directionToAngle UtilsTypes.Right = 0      -- 0 degrees for right
 
--- | Convert Pacman's state to a Picture with a wedge to represent an open mouth
+-- | Convert Pacman's state to a Picture using the PNG image
 pacmanToPicture :: Pacman -> Picture
 pacmanToPicture pacman =
   translatePosition (Model.Utils.Functions.position pacman) $
     rotate (directionToAngle $ Model.Pacman.Types.direction pacman) $
-      Color yellow $
-        arcSolid (startAngle - mouthSize / 2) (startAngle + mouthSize / 2) pacmanRadius
-  where
-    pacmanRadius = 5      -- Define the radius of Pacman
-    mouthSize = 60         -- Define the size of the mouth opening in degrees
-    startAngle = 0         -- 0 degrees is to the right, the default facing direction
+      pacmanImage
 
 pacmanIconSize :: Float
 pacmanIconSize = 4 -- Size of the pacman icon for lives
