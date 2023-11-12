@@ -1,7 +1,7 @@
 # PacMan in Haskell
 PacMan made w/ Haskell by Espen Noreng and Aksel Can Sozudogru
 ## GIF Walkthrough
-![PacmanWalk](https://github.com/espennoreng/pacman/assets/89808958/40a6d25b-ab4f-4959-b244-793d97085a40)
+![PacmanWalk](https://github.com/espennoreng/haskell-pacman/assets/89808958/7b163ac6-6c20-494e-9966-15a4513171b8)
 
 ## How to play
 - Try to eat all the dots. 
