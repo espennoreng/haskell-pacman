@@ -40,6 +40,23 @@ pacmanEatsFood pacman food =
         Just f -> (True, filter (/= f) food)
         Nothing -> (False, food)
 
+pacmanEatsPowerCookie :: Pacman -> [PowerCookie] -> (Bool, [PowerCookie])
+pacmanEatsPowerCookie pacman powerCookies =
+  let pacmanPos = position pacman
+      powerCookieEaten = find (intersects pacmanPos) powerCookies
+   in case powerCookieEaten of
+        Just f -> (True, filter (/= f) powerCookies)
+        Nothing -> (False, powerCookies)
+
+
+pacmanEatsGhost :: Pacman -> [Ghost] -> (Bool, [Ghost])
+pacmanEatsGhost pacman ghosts =
+  let pacmanPos = position pacman
+      ghostEaten = find (\g -> intersects pacmanPos (ghostPosition g) && frightenedTimer g > 0) ghosts
+   in case ghostEaten of
+        Just g -> (True, filter (/= g) ghosts)
+        Nothing -> (False, ghosts)
+
 pacmanLoosesLife :: Pacman -> [Ghost] -> Lives -> Lives
 pacmanLoosesLife pacman ghosts lives =
   if any (intersects (position pacman) . ghostPosition) ghosts

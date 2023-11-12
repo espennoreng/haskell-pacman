@@ -8,7 +8,7 @@ import Model.Ghosts.Functions
 import Model.Pacman.Functions
 
 handleUpdate :: Float -> GameState -> IO GameState
-handleUpdate deltaTime gameState@(GameState pacman food ghosts gen score lives screen paused)
+handleUpdate deltaTime gameState@(GameState pacman food powerCookies ghosts gen score lives screen paused)
   | paused || screen /= GameScreen = return gameState
   | otherwise = do
       let updatedPacman = movePacman pacmanGameBoard pacman
@@ -16,17 +16,22 @@ handleUpdate deltaTime gameState@(GameState pacman food ghosts gen score lives s
           releasedGhosts = map (releaseGhostIfNeeded pacmanGameBoard) updatedGhosts
           (movedGhosts, newGen) = moveGhosts gen pacmanGameBoard updatedPacman releasedGhosts
           (foodEaten, newFood) = pacmanEatsFood updatedPacman food
+          (powerCookieEaten, newPowerCookies) = pacmanEatsPowerCookie updatedPacman powerCookies
           scoreIncrement = if foodEaten then 1 else 0
-          newLives = pacmanLoosesLife updatedPacman movedGhosts lives
+          updatedGhostsFrigthened = if powerCookieEaten then setFrightenedTimer movedGhosts else movedGhosts
+          updatedGhostsDecrementTimer = map (decrementFrightenedTimer deltaTime) updatedGhostsFrigthened
+          (pacmanEatsGhost', updatedGhosts') = pacmanEatsGhost updatedPacman updatedGhostsDecrementTimer
+          newLives = if pacmanEatsGhost' then lives else pacmanLoosesLife updatedPacman updatedGhosts' lives
           newScore = score + scoreIncrement
           newGameScreen = if newLives == 0 then GameOverScreen else GameScreen
+          reSpawnedGhosts = ensureAllGhostsPresent updatedGhosts'
 
       if newLives < lives
         then if newLives > 0
           then return $ resetPositionsAndLooseLife gameState
-                 { score = newScore, food = newFood, screen = newGameScreen, randGen = newGen, lives = newLives }
+                 { score = newScore, food = newFood, ghosts = reSpawnedGhosts, powerCookies = newPowerCookies, screen = newGameScreen, randGen = newGen, lives = newLives }
           else do
             writeHighScore newScore
             return $ restartGame gameState { score = newScore }
         else return gameState
-                 { pacman = updatedPacman, ghosts = movedGhosts, food = newFood, score = newScore, screen = newGameScreen, randGen = newGen }
+                 { pacman = updatedPacman, ghosts = reSpawnedGhosts, food = newFood, powerCookies = newPowerCookies, score = newScore, screen = newGameScreen, randGen = newGen }

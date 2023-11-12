@@ -10,6 +10,8 @@ type Lives = Int
 
 type Food = Position
 
+type PowerCookie = Position
+
 type PowerPill = Position
 
 type Paused = Bool
@@ -19,6 +21,7 @@ data GameScreen = StartScreen | GameScreen | GameOverScreen deriving (Eq, Show)
 data GameState = GameState
   { pacman :: Pacman,
     food :: [Food],
+    powerCookies :: [PowerCookie],
     ghosts :: [Ghost],
     randGen :: StdGen,
     score :: Score,

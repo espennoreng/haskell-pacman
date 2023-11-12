@@ -48,6 +48,7 @@ initGameState =
   GameState
     { pacman = initPacman,
       food = makeFoodOnEveryAvailablePosition pacmanGameBoard,
+      powerCookies = makePowerOnEveryCorner pacmanGameBoard,
       ghosts = initGhosts,
       randGen = mkStdGen 0,
       score = 0,
@@ -57,11 +58,16 @@ initGameState =
     }
 
 
-
 makeFoodOnEveryAvailablePosition :: GameBoard -> [Food]
 makeFoodOnEveryAvailablePosition board =
   let allPositions = [(x, y) | x <- [-0.45, -0.40 .. 0.45], y <- [-0.45, -0.40 .. 0.45]]
    in filter (isPositionFree board) allPositions
+
+makePowerOnEveryCorner :: GameBoard -> [PowerCookie]
+makePowerOnEveryCorner board =
+  let cornerPositions = [(-0.45, -0.45), (-0.45, 0.45), (0.45, -0.45), (0.45, 0.45)]
+   in filter (isPositionFree board) cornerPositions
+
 
 isPositionFree :: GameBoard -> Position -> Bool
 isPositionFree (GameBoard walls) position =

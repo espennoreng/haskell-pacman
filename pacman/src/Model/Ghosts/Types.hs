@@ -9,6 +9,7 @@ data Ghost = Ghost
   { ghostType :: GhostType,
     ghostPosition :: Position,
     ghostMode :: GhostMode,
-    releaseTimer :: Float
+    releaseTimer :: Float,
+    frightenedTimer :: Float
   }
   deriving (Eq, Show)
