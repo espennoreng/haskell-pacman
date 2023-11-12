@@ -30,6 +30,16 @@
   (major1) == 1 && (major2) <  13 || \
   (major1) == 1 && (major2) == 13 && (minor) <= 2)
 #endif /* MIN_VERSION_gloss */
+/* package gloss-juicy-0.2.3 */
+#ifndef VERSION_gloss_juicy
+#define VERSION_gloss_juicy "0.2.3"
+#endif /* VERSION_gloss_juicy */
+#ifndef MIN_VERSION_gloss_juicy
+#define MIN_VERSION_gloss_juicy(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  2 || \
+  (major1) == 0 && (major2) == 2 && (minor) <= 3)
+#endif /* MIN_VERSION_gloss_juicy */
 /* package random-1.2.1.1 */
 #ifndef VERSION_random
 #define VERSION_random "1.2.1.1"
@@ -123,7 +133,7 @@
 #endif /* MIN_TOOL_VERSION_runghc */
 
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "gloss-pacman-0.1.0.0-6gObUl6lFi8H0cIkZlmEf8-gloss-counter"
+#define CURRENT_COMPONENT_ID "gloss-pacman-0.1.0.0-9mxCeX3VpQYJOzIC9N0q6F-gloss-counter"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "0.1.0.0"
