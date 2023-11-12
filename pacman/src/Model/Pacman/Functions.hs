@@ -16,8 +16,10 @@ initPacman =
   Pacman
     { position = (0, -0.45),
       direction = UtilsTypes.Right,
-      lastSuccessfulDirection = UtilsTypes.Right
+      lastSuccessfulDirection = UtilsTypes.Right,
+      isFull = False
     }
+
 
 movePacman :: GameBoard -> Pacman -> Pacman
 movePacman = moveEntity pacmanMovable

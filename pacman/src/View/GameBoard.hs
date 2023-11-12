@@ -3,9 +3,9 @@ module View.GameBoard where
 import Graphics.Gloss
 
 import View.Food
-import View.PowerCookie
 import View.Ghosts
 import View.Pacman
+import View.PowerCookie
 import View.Walls
 import View.Window
 import View.Score

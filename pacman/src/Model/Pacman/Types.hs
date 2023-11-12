@@ -13,6 +13,7 @@ data Movable a = Movable
 data Pacman = Pacman
   { position :: Position,
     direction :: Direction,
-    lastSuccessfulDirection :: Direction
+    lastSuccessfulDirection :: Direction,
+    isFull :: Bool
   }
   deriving (Eq, Show)
