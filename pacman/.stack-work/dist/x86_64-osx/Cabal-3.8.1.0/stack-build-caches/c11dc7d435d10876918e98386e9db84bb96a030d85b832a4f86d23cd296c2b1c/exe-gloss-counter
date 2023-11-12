@@ -1,4 +1,54 @@
-/Users/espennoreng/Desktop/School/Utrecht University/INFOFP/game-impl/pacman/gloss-pacman.cabal:
-  hash: 596252f5b42c4950129d896af7b2b4a125799f3f54798519aa9176b8c8826722
-/Users/espennoreng/Desktop/School/Utrecht University/INFOFP/game-impl/pacman/src/Main.hs:
-  hash: 68eef390e9ba648c16d8f66f18dfc7c4e935b33921bba921760f6e95ddaf0ecf
+/Users/espennoreng/Desktop/pacman/pacman/gloss-pacman.cabal:
+  hash: 17be18916fb4603874892216c616ce9424a1a1f9ac0fcb31d9004c9c2e436ba1
+/Users/espennoreng/Desktop/pacman/pacman/src/Controller/HighScore.hs:
+  hash: 72abed300a4b2fc8f636c75cfdb609d3b858fcae9a8c83a6611ece9aef7b72d6
+/Users/espennoreng/Desktop/pacman/pacman/src/Controller/Input.hs:
+  hash: fe4394e62d5f8e3639e538c402cf9785947b41f52c14f7d47b8e49aeb9ee5db1
+/Users/espennoreng/Desktop/pacman/pacman/src/Controller/Render.hs:
+  hash: 65e53a076b34532afe8b784a7715fd2af6f3c4269d63d17837573d95c948ec19
+/Users/espennoreng/Desktop/pacman/pacman/src/Controller/Update.hs:
+  hash: b6cf57ee396a7cc438d11bc9c58d2222e3a50b4fbaa0754de7cd72d702467d03
+/Users/espennoreng/Desktop/pacman/pacman/src/Main.hs:
+  hash: c846e19c9762ac9eabc2581d9cf018cfc6f5df5f1b239bf1711f301a4b99d568
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Ai/Functions.hs:
+  hash: d42f6fa873f53b01c317fa167cd202a887b27cc0b1eca455ae3434796bf36804
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Board/Functions.hs:
+  hash: a99e2e879b65fdfb36af057386638eefddbbf4b2fff36068db497a1ff1bfd994
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Board/GameBoard.hs:
+  hash: 3381c5e97c85a1c334972abf012eb5629df4db8127f7bd44021b4dd31ae6feba
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Board/Types.hs:
+  hash: 2870ffb2927b38247c95598a2505caaf41e29a8b2ff7642b4381ee44557c2bed
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Constants.hs:
+  hash: 01190694ac21a9b9ec264af5d0b84f6c06ee6a33b96f26af760a29271be99f29
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/GameState/Functions.hs:
+  hash: 34658adf5dacc8b7a76799e2c5dacf1b4fe85cba631a768c9e8d02138a5333e2
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/GameState/Types.hs:
+  hash: 095b22f8fc2e04e5f9db865dfb696a8f405bceb1d1aff970a9e0e8eddee61194
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Ghosts/Functions.hs:
+  hash: b9e673b3ddc519777a0e263d5b89ebed0b4b21406891d7970adfc801f1770b09
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Ghosts/Types.hs:
+  hash: a102c6c50cb90bc04cb275869a8f95ad53122eaa314aa5b6f5df72a010aba3da
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Pacman/Functions.hs:
+  hash: 76faebcb9c6930974524fb4b271a6f3258d2a15ef2759282dfac67f96e3ad561
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Pacman/Types.hs:
+  hash: e32e877508396cf95907073c9c71c5f6e6dd114211ac1c61fb17b0ea46663820
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Utils/Functions.hs:
+  hash: 6bab49e361c8f021967fa9180ce4e0dd709abec9b19d6b9ae7778d629d1afa34
+/Users/espennoreng/Desktop/pacman/pacman/src/Model/Utils/Types.hs:
+  hash: 94a93b4a00b51825c15336a0cfd7ed9a138b99c08cf8a0cc87879f67f003ea66
+/Users/espennoreng/Desktop/pacman/pacman/src/View/Food.hs:
+  hash: 3bd97b104f8c4a7923f93e71a52c5aeae4404c3e5cc4c63c193794eb12946311
+/Users/espennoreng/Desktop/pacman/pacman/src/View/GameBoard.hs:
+  hash: 1ea4fe38b703245f5199662f6bf6751b9ecf2050e1541054f2e210c4578d58a9
+/Users/espennoreng/Desktop/pacman/pacman/src/View/Ghosts.hs:
+  hash: acaf0d5aae87b76e0096de97a5f0bf0ce4a256e23a0fd11666174c89082b0532
+/Users/espennoreng/Desktop/pacman/pacman/src/View/Menu.hs:
+  hash: 6f85a69b96caacbc550ddb9898b7a45229b232d639cfd6d46c4964dd76b7f846
+/Users/espennoreng/Desktop/pacman/pacman/src/View/Pacman.hs:
+  hash: a5462806c9b94dbc39ff0da01ee24a6e15670c2ab2726b085c7bb94cf583b5d8
+/Users/espennoreng/Desktop/pacman/pacman/src/View/Score.hs:
+  hash: ed6046b492c8f42449f5bd9d628ab904aae8162509f7b9f2de323e0588496fef
+/Users/espennoreng/Desktop/pacman/pacman/src/View/Walls.hs:
+  hash: cf8658b910e9e436995608dbf805581a71416c6cd64e24c9b14550adc3f07e51
+/Users/espennoreng/Desktop/pacman/pacman/src/View/Window.hs:
+  hash: 1b99ef9c75b6695df54ac1832bd364647e4061a7a47b714514ee0db741d9b2dd

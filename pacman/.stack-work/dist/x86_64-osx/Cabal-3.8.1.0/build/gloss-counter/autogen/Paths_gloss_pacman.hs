@@ -42,12 +42,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "/Users/espennoreng/Desktop/School/Utrecht University/INFOFP/game-impl/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/bin"
-libdir     = "/Users/espennoreng/Desktop/School/Utrecht University/INFOFP/game-impl/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/lib/x86_64-osx-ghc-9.4.7/gloss-pacman-0.1.0.0-6gObUl6lFi8H0cIkZlmEf8-gloss-counter"
-dynlibdir  = "/Users/espennoreng/Desktop/School/Utrecht University/INFOFP/game-impl/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/lib/x86_64-osx-ghc-9.4.7"
-datadir    = "/Users/espennoreng/Desktop/School/Utrecht University/INFOFP/game-impl/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/share/x86_64-osx-ghc-9.4.7/gloss-pacman-0.1.0.0"
-libexecdir = "/Users/espennoreng/Desktop/School/Utrecht University/INFOFP/game-impl/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/libexec/x86_64-osx-ghc-9.4.7/gloss-pacman-0.1.0.0"
-sysconfdir = "/Users/espennoreng/Desktop/School/Utrecht University/INFOFP/game-impl/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/etc"
+bindir     = "/Users/espennoreng/Desktop/pacman/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/bin"
+libdir     = "/Users/espennoreng/Desktop/pacman/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/lib/x86_64-osx-ghc-9.4.7/gloss-pacman-0.1.0.0-6gObUl6lFi8H0cIkZlmEf8-gloss-counter"
+dynlibdir  = "/Users/espennoreng/Desktop/pacman/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/lib/x86_64-osx-ghc-9.4.7"
+datadir    = "/Users/espennoreng/Desktop/pacman/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/share/x86_64-osx-ghc-9.4.7/gloss-pacman-0.1.0.0"
+libexecdir = "/Users/espennoreng/Desktop/pacman/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/libexec/x86_64-osx-ghc-9.4.7/gloss-pacman-0.1.0.0"
+sysconfdir = "/Users/espennoreng/Desktop/pacman/pacman/.stack-work/install/x86_64-osx/c11dc7d435d10876918e98386e9db84bb96a030d85b832a4f86d23cd296c2b1c/9.4.7/etc"
 
 getBinDir     = catchIO (getEnv "gloss_pacman_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "gloss_pacman_libdir")     (\_ -> return libdir)

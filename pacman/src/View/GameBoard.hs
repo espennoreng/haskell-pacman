@@ -17,9 +17,9 @@ import Model.Board.Types
 gameBoardToPicture :: GameBoard -> GameState -> Picture
 gameBoardToPicture (GameBoard walls) (GameState pacman foods ghosts _ score lives _ paused) =
   pictures $
-    [ghostToPicture ghost | ghost <- ghosts]
-      ++ [wallToPicture wall | wall <- walls]
+      [wallToPicture wall | wall <- walls]
       ++ [foodToPicture food | food <- foods]
+      ++ [ghostToPicture ghost | ghost <- ghosts]
       ++ [pacmanToPicture pacman]
       ++ [gameScoreToPicture score]
       ++ [pacmanLivesToPicture lives]
